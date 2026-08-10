@@ -403,6 +403,32 @@ body.has-photos .tagline { text-shadow: 0 1px 8px rgba(250,244,226,0.9); }
   box-shadow: 0 0 8px var(--amber);
 }
 
+.topbar-right { display: inline-flex; align-items: center; gap: 1rem; }
+
+/* --- Theme picker ------------------------------------------
+   Small round swatches, one per available background. Hidden
+   until the photos have loaded, so it never offers a choice
+   that doesn't exist. --------------------------------------- */
+.theme-picker { display: none; align-items: center; gap: 0.5rem; }
+.theme-picker.on { display: inline-flex; }
+.swatch {
+  width: 17px; height: 17px; border-radius: 50%;
+  border: 1.5px solid var(--border-strong);
+  padding: 0; cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.swatch:hover { transform: scale(1.15); }
+.swatch[aria-pressed="true"] {
+  border-color: var(--ink-red);
+  box-shadow: 0 0 0 2px rgba(173, 63, 40, 0.35);
+}
+
+@media (max-width: 520px) {
+  .topbar-right { gap: 0.6rem; }
+  .theme-picker { gap: 0.4rem; }
+  .swatch { width: 14px; height: 14px; }
+}
+
 /* --- Centre block --- */
 .center { align-self: center; text-align: center; }
 
@@ -1028,13 +1054,19 @@ body.has-photos .tagline { text-shadow: 0 1px 8px rgba(250,244,226,0.9); }
 
   <header class="topbar">
     <span class="clock" id="clock" aria-live="off"></span>
-    <span class="online"><span class="dot"></span><span id="online-count">24</span> driving</span>
+    <span class="topbar-right">
+      <!-- Filled by the script once background photos are found: little
+           swatches that let a visitor pin one view or go back to the
+           drawn hills. Invisible until there's something to choose. -->
+      <nav class="theme-picker" id="theme-picker" aria-label="Background theme"></nav>
+      <span class="online"><span class="dot"></span><span id="online-count">24</span> driving</span>
+    </span>
   </header>
 
   <main class="center">
-    <h1 class="wordmark-hi">पहाड़ी ड्राइव</h1>
-    <p class="wordmark-en">Pahadi · Drive</p>
-    <p class="tagline">“Music from the hills, for anyone far from them.”</p>
+    <h1 class="wordmark-hi">पहाड़ बुला रहे हैं</h1>
+    <p class="wordmark-en">Come Home To The Hills</p>
+    <p class="tagline">“पुरानी सड़कें, पुराने गीत — old roads, old songs.”</p>
 
     <nav class="links" aria-label="Listen elsewhere">
       <a href="https://open.spotify.com/search/garhwali%20kumaoni" target="_blank" rel="noopener noreferrer" aria-label="Search pahadi music on Spotify">
@@ -1261,43 +1293,95 @@ setInterval(updateOnline, 4200);
    Delete the image files and the drawn scene comes back. Nothing
    else to configure.
    ================================================================ */
-const PHOTOS = ['bg-flowers.jpg', 'bg-lake.jpg', 'bg-road.jpg'];
+// file — the JPEG next to index.html; label — what screen readers hear;
+// tint — the little swatch colour in the top-right picker.
+const PHOTOS = [
+  { file: 'bg-flowers.jpg', label: 'Valley of flowers', tint: '#b0402a' },
+  { file: 'bg-lake.jpg',    label: 'Nainital lake',     tint: '#4e8d84' },
+  { file: 'bg-road.jpg',    label: 'Hill road',         tint: '#8a9a6b' },
+];
 
 (function () {
   const holder = document.getElementById('photo-bg');
   const scrim  = holder.querySelector('.photo-scrim');
-  const loaded = [];          // the photo divs that actually loaded
-  let   shown  = 0;           // which one is currently visible
+  const picker = document.getElementById('theme-picker');
+  const loaded = [];          // photos that actually loaded: {div, label, tint}
+  let   shown  = 0;           // which one is visible while rotating
+  let   mode   = 'auto';      // 'auto' | a photo's label | 'hills'
   let   started = false;
   const stillness = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  function tick() {
-    if (loaded.length < 2) return;              // nothing to rotate to
-    loaded[shown].classList.remove('showing');
-    shown = (shown + 1) % loaded.length;
-    loaded[shown].classList.add('showing');
+  function showOnly(i) {
+    loaded.forEach(function (p, j) { p.div.classList.toggle('showing', i === j); });
+    shown = i;
   }
+
+  function tick() {
+    // The slideshow only turns while the visitor hasn't pinned a theme.
+    if (mode !== 'auto' || loaded.length < 2) return;
+    showOnly((shown + 1) % loaded.length);
+  }
+
+  /* The visitor's choice, from the swatches in the top-right:
+     'auto'  — slow crossfade through every photo (the default)
+     a photo — that photo, pinned
+     'hills' — photos off, back to the hand-drawn scene
+     Kept in a plain variable, so it simply resets on reload. */
+  function setTheme(choice) {
+    mode = choice;
+    if (choice === 'hills') {
+      document.body.classList.remove('has-photos');
+    } else {
+      document.body.classList.add('has-photos');
+      const i = loaded.findIndex(function (p) { return p.label === choice; });
+      showOnly(i >= 0 ? i : shown);
+    }
+    picker.querySelectorAll('.swatch').forEach(function (b) {
+      b.setAttribute('aria-pressed', String(b.dataset.theme === choice));
+    });
+  }
+
+  function buildPicker() {
+    const options = [{ theme: 'auto', label: 'All views, slowly changing',
+                       tint: 'conic-gradient(#b0402a, #4e8d84, #8a9a6b, #b0402a)' }]
+      .concat(loaded.map(function (p) { return { theme: p.label, label: p.label, tint: p.tint }; }))
+      .concat([{ theme: 'hills', label: 'Hand-drawn hills', tint: 'linear-gradient(#e9dcbc 30%, #5e7f5c 30%)' }]);
+    picker.innerHTML = options.map(function (o) {
+      return '<button class="swatch" data-theme="' + escapeHTML(o.theme) + '"' +
+        ' style="background:' + o.tint + '"' +
+        ' title="' + escapeHTML(o.label) + '" aria-label="' + escapeHTML(o.label) + '"' +
+        ' aria-pressed="' + String(o.theme === mode) + '"></button>';
+    }).join('');
+    picker.classList.add('on');
+  }
+
+  picker.addEventListener('click', function (e) {
+    const b = e.target.closest('.swatch');
+    if (b) setTheme(b.dataset.theme);
+  });
 
   function startShow() {
     if (started) return;
     started = true;
     document.body.classList.add('has-photos');  // hides the drawn hills
-    loaded[0].classList.add('showing');
+    showOnly(0);
     if (!stillness) setInterval(tick, 16000);   // slow, unhurried fades
   }
 
-  PHOTOS.forEach(function (src) {
+  PHOTOS.forEach(function (photo) {
     const probe = new Image();
     probe.onload = function () {
       const d = document.createElement('div');
       d.className = 'photo';
-      d.style.backgroundImage = "url('" + src + "')";
+      d.style.backgroundImage = "url('" + photo.file + "')";
       holder.insertBefore(d, scrim);            // scrim stays on top
-      loaded.push(d);
+      loaded.push({ div: d, label: photo.label, tint: photo.tint });
       startShow();
+      buildPicker();  // rebuilt as each photo arrives
     };
-    // If the file isn't there, nothing happens — the drawn scene stays.
-    probe.src = src;
+    // If the file isn't there, nothing happens — the drawn scene stays
+    // and the picker never appears.
+    probe.src = photo.file;
   });
 })();
 

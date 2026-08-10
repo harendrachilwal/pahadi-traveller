@@ -84,6 +84,17 @@ redeploys on its own within a minute.
 - Keep each JPEG under ~500 KB if you can (export at around 2000px wide) so
   phones load them fast.
 
+Once photos exist, small round swatches appear in the **top-right corner**:
+visitors can pin any single view, go back to the hand-drawn hills, or return
+to the slow slideshow. The choice is per-visit (nothing is stored). To
+rename what screen readers call each view, search for `PHOTOS` in
+`index.html` and edit the `label` text.
+
+The big headline is ordinary text near the bottom of `index.html` — search
+for `wordmark-hi`. Current copy: **पहाड़ बुला रहे हैं / Come Home To The
+Hills**, with the tagline *“पुरानी सड़कें, पुराने गीत — old roads, old
+songs.”*
+
 ## Changing how it looks
 
 **Colours.** Search for `COLOR TOKENS` at the very top of the file. Every
