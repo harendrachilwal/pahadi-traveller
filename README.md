@@ -1,4 +1,4 @@
-# Pahadi Drive — पहाड़ी ड्राइव
+# Pahadi SaFar — पहाड़ी सफ़र
 
 A single-page mood piece: dusk in the Uttarakhand hills, with Garhwali and
 Kumaoni music playing. No signup, no menus, no scrolling. One screen.
