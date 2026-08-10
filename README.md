@@ -1,44 +1,127 @@
-# Pahadi Traveller
+# Pahadi Drive — पहाड़ी ड्राइव
 
-Static landing page for Pahadi Traveller — treks, homestays and slow travel across
-the Indian Himalayas.
+A single-page mood piece: dusk in the Uttarakhand hills, with Garhwali and
+Kumaoni music playing. No signup, no menus, no scrolling. One screen.
 
-## Structure
+Live at **https://www.pahaditraveller.in**
+
+---
+
+## The whole project is one file
 
 ```
-index.html    landing page
-styles.css    all styles (light + dark)
-favicon.svg   site icon
-vercel.json   static hosting config (clean URLs)
+index.html    the entire site — HTML, CSS and JavaScript together
+CLAUDE.md     the project brief
+vercel.json   hosting settings
 ```
 
-No build step and no dependencies — it's plain HTML and CSS.
+There is nothing to install and nothing to build. Double-click `index.html`
+and it opens and works. That's deliberate — it keeps the whole thing
+editable by one person without a toolchain.
 
-## Running locally
-
-Open `index.html` directly in a browser, or serve the folder:
+To see it locally with a proper address bar instead:
 
 ```bash
 python3 -m http.server 3000
-# → http://localhost:3000
+# then open http://localhost:3000
 ```
 
-## Deploying
+---
 
-The repo is connected to Vercel. Pushes to `main` deploy to production; every
-other branch gets a preview deployment.
+## Adding or changing a song
 
-In the Vercel project settings, the framework preset should be **Other** with no
-build command and the output directory set to the repository root.
+This is the part you'll touch most. Open `index.html` in any text editor and
+search for **`PLAYLIST`** — it's near the top of the JavaScript, about
+two-thirds of the way down the file.
 
-### Domains
+You'll see a list of lines that look like this:
 
-Production is served at **https://www.pahaditraveller.in**. The apex
-`pahaditraveller.in` redirects to `www`, and `pahadi-traveller.vercel.app`
-remains as a fallback alias.
+```js
+{ id: '4FYT0TIZfnI', title: 'Bedu Pako Baro Masa', artist: 'Mahima Thakur', region: 'kumaoni' },
+```
 
-DNS is delegated to Vercel — `pahaditraveller.in` uses `ns1.vercel-dns.com` and
-`ns2.vercel-dns.com` as its nameservers. Manage all records (MX, TXT,
-subdomains) under Vercel → Domains → pahaditraveller.in → DNS Records. Records
-added in the GoDaddy panel have no effect, since GoDaddy is only the registrar
-and no longer answers DNS for this domain.
+To add a song:
+
+1. Open the song on YouTube.
+2. Look at the address bar. It'll read something like
+   `youtube.com/watch?v=4FYT0TIZfnI`. The 11 characters after `v=` are the ID.
+3. Copy an existing line, paste it below, and swap in your ID, title and artist.
+
+`region` can be `garhwali`, `kumaoni` or `folk`. It shows as the small tag on
+the right of each row in the playlist.
+
+To remove a song, delete its line. To reorder, move lines around — the list
+plays top to bottom.
+
+**A caution:** don't type an ID from memory or guess one. A made-up
+11-character string looks completely normal and simply fails to play. Always
+copy it from the address bar.
+
+If a song ever stops working, it was probably taken down or the uploader
+turned off embedding. The player notices and skips to the next song on its
+own, so a dead link never freezes the music — but you can delete the line to
+tidy up.
+
+---
+
+## Changing how it looks
+
+**Colours.** Search for `COLOR TOKENS` at the very top of the file. Every
+colour on the page is defined once in that block, so changing `--sky-glow`
+changes the horizon everywhere it appears. Nothing below that block hardcodes
+a colour.
+
+**The mountains.** Search for `SCENE`. There are four ridge layers — snow
+peaks furthest away, then two hill ridges, then the dark pines closest to
+you. Each is an SVG shape drawn twice side by side, which is what lets it
+slide sideways forever without a visible seam.
+
+If you change a ridge's shape, keep the two halves identical or the loop will
+jump. And keep the curves — the `C` letters in the shape data are what make
+the peaks look like real mountains rather than a cartoon zigzag.
+
+**How fast things move.** Search for `drift`. Each ridge has its own duration
+(30s, 24s, 18s, 14s). Nearer ridges move faster, which is what sells the
+feeling of driving forward. Bigger number = slower.
+
+---
+
+## Things worth knowing
+
+**Why the "Begin the drive" screen exists.** Browsers refuse to play sound
+until someone clicks something. That button is the click. Remove it and the
+site loads silent on phones with no way to start.
+
+**Why YouTube.** Pahadi music is licensed and lives on YouTube. Playing it
+through YouTube's official player means plays still count for the artists.
+
+**The "driving" number.** It's atmosphere, not a real count. There's no server
+behind this site, so it can't know how many people are here. It drifts
+around a plausible number.
+
+---
+
+## Keyboard
+
+| Key | Does |
+|---|---|
+| `Space` | play / pause |
+| `←` `→` | previous / next song |
+| `P` | open the playlist |
+| `Esc` | close the playlist |
+
+---
+
+## Publishing changes
+
+The site is connected to Vercel. Push to the `main` branch and it goes live
+within about a minute:
+
+```bash
+git add index.html
+git commit -m "Added two songs"
+git push
+```
+
+In Vercel's project settings the framework preset is **Other**, with the
+build command left empty — there's no build step to run.

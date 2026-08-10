@@ -1,115 +1,1173 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Pahadi Traveller — Journeys through the Himalayas</title>
-  <meta name="description" content="Pahadi Traveller — curated treks, homestays and slow travel across the Indian Himalayas." />
-  <meta property="og:title" content="Pahadi Traveller" />
-  <meta property="og:description" content="Curated treks, homestays and slow travel across the Indian Himalayas." />
-  <meta property="og:type" content="website" />
-  <meta name="theme-color" content="#0f2027" />
-  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="/styles.css" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+
+<title>Pahadi Drive — पहाड़ी ड्राइव</title>
+<meta name="description" content="A drive through the hills of Uttarakhand, with Garhwali and Kumaoni music. Open it when you miss home." />
+<meta name="theme-color" content="#0a1620" />
+
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Pahadi Drive — पहाड़ी ड्राइव" />
+<meta property="og:description" content="A drive through the hills of Uttarakhand, with Garhwali and Kumaoni music." />
+<meta property="og:image" content="/og.png" />
+<meta name="twitter:card" content="summary_large_image" />
+
+<!-- Favicon is inlined as a data URI so the whole site stays a single file. -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230a1620'/%3E%3Cpath d='M3 25 L11 12 L16 19 L21 7 L29 25 Z' fill='%23d68b52'/%3E%3C/svg%3E" type="image/svg+xml" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,9..144,300;1,9..144,400&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Tiro+Devanagari+Hindi&display=swap" rel="stylesheet" />
+
+<style>
+/* ============================================================
+   COLOR TOKENS
+   Modelled on a real Chopta/Munsiyari dusk. Change colours here,
+   not further down — everything else refers back to these.
+   ============================================================ */
+:root {
+  --sky-deep:       #0a1620;
+  --sky-mid:        #12283a;
+  --sky-warm:       #3d4b4d;
+  --sky-glow:       #d68b52;
+  --sky-glow-soft:  #e8b078;
+  --horizon:        #4a3a2a;
+  --snow:           #f0e4cf;
+  --pine-far:       #253944;
+  --pine-mid:       #17262f;
+  --pine-near:      #0a1418;
+  --ivory:          #eadfcb;
+  --ivory-dim:      rgba(234, 223, 203, 0.68);
+  --ivory-faint:    rgba(234, 223, 203, 0.38);
+  --amber:          #e6a566;
+  --glass:          rgba(10, 18, 24, 0.42);
+  --glass-strong:   rgba(10, 18, 24, 0.62);
+  --border:         rgba(234, 223, 203, 0.13);
+  --border-strong:  rgba(234, 223, 203, 0.22);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* This site never scrolls. One screen, one job. */
+html, body {
+  height: 100%;
+  overflow: hidden;
+  background: var(--sky-deep);
+}
+
+body {
+  font-family: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
+  color: var(--ivory);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+button { font: inherit; color: inherit; background: none; border: none; cursor: pointer; }
+
+:focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; border-radius: 4px; }
+
+/* ============================================================
+   THE SKY
+   A fixed gradient behind everything. Amber sits low, where the
+   sun just dropped behind the ridge.
+   ============================================================ */
+.sky {
+  position: fixed;
+  inset: 0;
+  background:
+    linear-gradient(to bottom,
+      var(--sky-deep)   0%,
+      var(--sky-deep)   18%,
+      var(--sky-mid)    44%,
+      var(--sky-warm)   64%,
+      var(--sky-glow-soft) 84%,
+      var(--sky-glow)   94%,
+      var(--horizon)   100%);
+}
+
+/* A soft bloom sitting right on the horizon line. Lives inside .scene
+   so it gets clipped with everything else. */
+.sun-glow {
+  position: absolute;
+  left: 50%;
+  bottom: 6%;
+  width: 120vmax;
+  height: 46vmax;
+  transform: translateX(-50%);
+  background: radial-gradient(ellipse at 50% 100%,
+      rgba(232, 176, 120, 0.50) 0%,
+      rgba(214, 139, 82, 0.24) 34%,
+      rgba(214, 139, 82, 0) 68%);
+  pointer-events: none;
+}
+
+/* ============================================================
+   THE SCENE
+   Four ridge layers + road + fog. Each .ridge holds an SVG that
+   is 200% wide with its shape drawn twice, so sliding it left by
+   50% loops seamlessly and reads as slow forward motion.
+   ============================================================ */
+/* Clipped so the oversized fog and glow can't widen the page on phones.
+   Safe because every layer inside fades to transparent before its own
+   edge — nothing hard ever reaches this boundary. */
+.scene { position: fixed; inset: 0; pointer-events: none; overflow: hidden; }
+
+.ridge { position: absolute; left: 0; width: 100%; overflow: hidden; }
+.ridge svg { display: block; width: 200%; height: 100%; }
+
+.ridge-snow { bottom: 26%; height: 26vh; }
+.ridge-far  { bottom: 19%; height: 24vh; }
+.ridge-mid  { bottom: 10%; height: 22vh; }
+.ridge-near { bottom:  0;  height: 17vh; }
+
+/* The animation goes on the SVG, never on .ridge — .ridge is the window
+   that crops it. Move the window and its clip edge travels too, dragging
+   a hard vertical seam across the scene. */
+.ridge-snow svg { animation: drift 30s linear infinite; }
+.ridge-far  svg { animation: drift 24s linear infinite; }
+.ridge-mid  svg { animation: drift 18s linear infinite; }
+.ridge-near svg { animation: drift 14s linear infinite; }
+
+/* Each SVG draws its ridge twice across its own width, so shifting by
+   half of itself lands exactly on the repeat and the loop is invisible. */
+@keyframes drift {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+.road-layer { position: absolute; left: 0; bottom: 8%; width: 100%; height: 21vh; overflow: hidden; }
+.road-layer svg { display: block; width: 100%; height: 100%; }
+
+/* --- Fog -------------------------------------------------
+   Three big blurred bands on deliberately mismatched timings
+   (75s / 110s / 140s) so the loop never lines up visibly.
+   --------------------------------------------------------- */
+.fog {
+  position: absolute;
+  left: -30%;
+  width: 160%;
+  filter: blur(38px);
+  mix-blend-mode: screen;
+  opacity: 0.5;
+}
+/* Radial rather than linear so the bands fade out on every edge —
+   a linear gradient leaves hard top and bottom lines. */
+.fog-1 {
+  bottom: 26%; height: 12vh;
+  background: radial-gradient(ellipse 58% 100% at 44% 50%, rgba(200,214,220,0.34) 0%, rgba(224,232,236,0.14) 42%, transparent 72%);
+  animation: fogdrift 75s ease-in-out infinite alternate;
+}
+.fog-2 {
+  bottom: 36%; height: 10vh; opacity: 0.34;
+  background: radial-gradient(ellipse 48% 100% at 62% 50%, rgba(186,204,214,0.30) 0%, transparent 70%);
+  animation: fogdrift 110s ease-in-out infinite alternate-reverse;
+}
+.fog-3 {
+  bottom: 13%; height: 14vh; opacity: 0.44;
+  background: radial-gradient(ellipse 66% 100% at 38% 50%, rgba(214,226,230,0.30) 0%, rgba(232,176,120,0.10) 46%, transparent 74%);
+  animation: fogdrift 140s ease-in-out infinite alternate;
+}
+@keyframes fogdrift {
+  from { transform: translateX(-7%); }
+  to   { transform: translateX(7%); }
+}
+
+/* Village lights on the near ridge. */
+.light { animation: twinkle 4s ease-in-out infinite; transform-origin: center; }
+@keyframes twinkle {
+  0%, 100% { opacity: 0.85; }
+  50%      { opacity: 0.30; }
+}
+
+.vignette {
+  position: fixed; inset: 0; pointer-events: none;
+  background: radial-gradient(ellipse at 50% 45%, transparent 40%, rgba(6,12,16,0.42) 78%, rgba(4,9,12,0.72) 100%);
+}
+
+/* ============================================================
+   LAYOUT — three rows filling the viewport
+   ============================================================ */
+.grid {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  height: 100dvh;
+  padding:
+    calc(1.15rem + env(safe-area-inset-top))
+    calc(1.3rem + env(safe-area-inset-right))
+    calc(1.15rem + env(safe-area-inset-bottom))
+    calc(1.3rem + env(safe-area-inset-left));
+}
+
+/* --- Topbar --- */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  color: var(--ivory-dim);
+}
+.clock .ampm { font-size: 0.62em; margin-left: 0.32em; opacity: 0.72; }
+.online { display: inline-flex; align-items: center; gap: 0.45rem; }
+.online .dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--amber);
+  box-shadow: 0 0 8px var(--amber);
+}
+
+/* --- Centre block --- */
+.center { align-self: center; text-align: center; }
+
+.wordmark-hi {
+  font-family: 'Tiro Devanagari Hindi', serif;
+  font-size: clamp(2.5rem, 9vw, 4.6rem);
+  line-height: 1.25;
+  color: var(--ivory);
+  text-shadow: 0 2px 30px rgba(10, 18, 24, 0.55);
+}
+.wordmark-en {
+  font-family: 'Fraunces', Georgia, serif;
+  font-style: italic;
+  font-weight: 300;
+  text-transform: uppercase;
+  letter-spacing: 0.32em;
+  font-size: clamp(0.66rem, 2.1vw, 0.86rem);
+  color: var(--ivory-dim);
+  margin-top: 0.85rem;
+  padding-left: 0.32em; /* balance the trailing letter-space */
+}
+.tagline {
+  font-family: 'Fraunces', Georgia, serif;
+  font-style: italic;
+  font-weight: 300;
+  font-size: clamp(0.86rem, 2.4vw, 1rem);
+  color: var(--ivory-faint);
+  margin-top: 1.5rem;
+}
+.links { display: flex; justify-content: center; gap: 0.7rem; margin-top: 1.9rem; }
+.links a, .links button {
+  display: grid; place-items: center;
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--glass);
+  color: var(--ivory-dim);
+  transition: border-color 0.2s, color 0.2s, transform 0.2s;
+}
+.links a:hover, .links button:hover {
+  border-color: var(--border-strong);
+  color: var(--ivory);
+  transform: translateY(-2px);
+}
+.links svg { width: 17px; height: 17px; fill: currentColor; }
+
+/* ============================================================
+   PLAYER
+   ============================================================ */
+.player {
+  align-self: end;
+  width: min(560px, 100%);
+  margin: 0 auto;
+  padding: 1rem 1.15rem 1.1rem;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--glass-strong);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.player-head {
+  display: flex; align-items: center; justify-content: space-between;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 0.6rem; letter-spacing: 0.19em; text-transform: uppercase;
+  color: var(--ivory-faint);
+}
+.drawer-toggle {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  color: var(--ivory-faint); transition: color 0.2s;
+}
+.drawer-toggle:hover { color: var(--ivory); }
+.drawer-toggle svg { width: 13px; height: 13px; fill: currentColor; }
+
+.track-title {
+  font-family: 'Fraunces', Georgia, serif;
+  font-style: italic; font-weight: 400;
+  font-size: 1.05rem; line-height: 1.35;
+  margin-top: 0.65rem;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.track-artist {
+  font-size: 0.76rem; color: var(--ivory-faint); margin-top: 0.2rem;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* --- Progress --- */
+.progress-row {
+  display: flex; align-items: center; gap: 0.7rem;
+  margin-top: 0.95rem;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 0.62rem; color: var(--ivory-faint);
+}
+.progress {
+  position: relative; flex: 1; height: 20px;
+  display: flex; align-items: center;
+  cursor: pointer; touch-action: none;
+}
+.progress-track {
+  position: absolute; left: 0; right: 0; height: 2px;
+  background: rgba(234, 223, 203, 0.16); border-radius: 2px;
+}
+.progress-fill {
+  position: absolute; left: 0; height: 2px; width: 0%;
+  background: var(--amber); border-radius: 2px;
+}
+.progress-knob {
+  position: absolute; left: 0; width: 9px; height: 9px;
+  margin-left: -4.5px; border-radius: 50%;
+  background: var(--amber);
+  box-shadow: 0 0 10px rgba(230, 165, 102, 0.75);
+  opacity: 0; transition: opacity 0.2s;
+}
+.progress:hover .progress-knob,
+.progress:focus-visible .progress-knob,
+.progress.dragging .progress-knob { opacity: 1; }
+
+/* --- Controls --- */
+.controls {
+  display: flex; align-items: center; justify-content: center;
+  gap: 1.5rem; margin-top: 0.85rem;
+}
+.ctrl { color: var(--ivory-dim); transition: color 0.2s, transform 0.15s; display: grid; place-items: center; }
+.ctrl:hover { color: var(--ivory); }
+.ctrl:active { transform: scale(0.92); }
+.ctrl svg { width: 19px; height: 19px; fill: currentColor; }
+.ctrl.is-on { color: var(--amber); }
+
+.play {
+  width: 52px; height: 52px; border-radius: 50%;
+  background: var(--ivory); color: var(--sky-deep);
+  display: grid; place-items: center;
+  transition: transform 0.15s, background 0.2s;
+}
+.play:hover { transform: scale(1.05); }
+.play:active { transform: scale(0.96); }
+.play svg { width: 20px; height: 20px; fill: currentColor; }
+
+/* ============================================================
+   PLAYLIST DRAWER
+   ============================================================ */
+.backdrop {
+  position: fixed; inset: 0; z-index: 3;
+  background: rgba(5, 10, 14, 0.55);
+  backdrop-filter: blur(3px);
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.3s;
+}
+.backdrop.open { opacity: 1; pointer-events: auto; }
+
+.drawer {
+  position: fixed; z-index: 4;
+  left: 50%; bottom: 0;
+  width: min(560px, 100%);
+  max-height: 68dvh;
+  transform: translate(-50%, 100%);
+  transition: transform 0.36s cubic-bezier(0.32, 0.72, 0.24, 1);
+  background: var(--glass-strong);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border);
+  border-bottom: none;
+  border-radius: 18px 18px 0 0;
+  display: flex; flex-direction: column;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.drawer.open { transform: translate(-50%, 0); }
+
+.drawer-grip { padding: 0.75rem 0 0.5rem; display: grid; place-items: center; cursor: grab; }
+.drawer-grip span { width: 34px; height: 3px; border-radius: 3px; background: var(--border-strong); }
+
+.drawer-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.15rem 1.2rem 0.75rem;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 0.6rem; letter-spacing: 0.19em; text-transform: uppercase;
+  color: var(--ivory-faint);
+  border-bottom: 1px solid var(--border);
+}
+
+.tracklist { overflow-y: auto; overscroll-behavior: contain; padding: 0.4rem 0 0.9rem; }
+
+.track {
+  display: flex; align-items: center; gap: 0.85rem; width: 100%;
+  padding: 0.62rem 1.2rem; text-align: left;
+  transition: background 0.15s;
+}
+.track:hover { background: rgba(234, 223, 203, 0.05); }
+.track-num {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 0.62rem; color: var(--ivory-faint); width: 1.4rem; flex-shrink: 0;
+}
+.track-body { min-width: 0; flex: 1; display: block; }
+.track-name {
+  display: block;
+  font-family: 'Fraunces', Georgia, serif; font-style: italic; font-size: 0.94rem;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.track-by {
+  display: block;
+  font-size: 0.7rem; color: var(--ivory-faint); margin-top: 0.1rem;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.pill {
+  flex-shrink: 0;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 0.52rem; letter-spacing: 0.12em; text-transform: uppercase;
+  padding: 0.2rem 0.45rem; border-radius: 4px;
+  border: 1px solid var(--border); color: var(--ivory-faint);
+}
+.track.current .track-name { color: var(--amber); }
+.track.current .track-num  { color: var(--amber); }
+
+/* ============================================================
+   INTRO OVERLAY
+   Browsers block audio until the user interacts. This click is
+   what unlocks it — without the overlay, mobile loads silent.
+   ============================================================ */
+.intro {
+  position: fixed; inset: 0; z-index: 10;
+  display: grid; place-items: center;
+  background: var(--sky-deep);
+  transition: opacity 0.9s ease, visibility 0.9s;
+}
+.intro.gone { opacity: 0; visibility: hidden; pointer-events: none; }
+.intro-inner { text-align: center; padding: 2rem; }
+.intro-hi {
+  font-family: 'Tiro Devanagari Hindi', serif;
+  font-size: clamp(2rem, 8vw, 3.4rem);
+  color: var(--ivory);
+}
+.intro-sub {
+  font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 300;
+  color: var(--ivory-faint); margin-top: 0.9rem; font-size: 0.95rem;
+}
+.begin {
+  margin-top: 2.4rem;
+  padding: 0.8rem 2rem; border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  color: var(--ivory);
+  font-size: 0.82rem; letter-spacing: 0.16em; text-transform: uppercase;
+  transition: background 0.25s, border-color 0.25s, transform 0.2s;
+}
+.begin:hover { background: rgba(234,223,203,0.07); border-color: var(--amber); transform: translateY(-2px); }
+
+/* The YouTube iframe lives off-screen. NOT display:none — some
+   browsers refuse to play audio from a fully hidden iframe. */
+#yt-player { position: fixed; top: -9999px; left: -9999px; width: 1px; height: 1px; }
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+/* ============================================================
+   MOBILE — the primary target. Most people open this on a phone.
+   ============================================================ */
+@media (max-width: 520px) {
+  .grid { padding-left: calc(0.9rem + env(safe-area-inset-left)); padding-right: calc(0.9rem + env(safe-area-inset-right)); }
+  .tagline { display: none; }
+
+  /* The ridges stretch to fill their box, so a narrow screen squeezes them
+     horizontally and the summits turn into needles. Widening the SVG
+     restores roughly the desktop proportions — and since the shape still
+     repeats twice across the SVG's own width, the -50% loop is unaffected. */
+  .ridge svg { width: 480%; }
+  /* Heights exceed the gaps between them so the layers overlap — leave a
+     gap and the bright horizon shows through as a flat amber stripe. */
+  .ridge-snow { bottom: 24%; height: 24vh; }
+  .ridge-far  { bottom: 17%; height: 22vh; }
+  .ridge-mid  { bottom:  8%; height: 20vh; }
+  .ridge-near { bottom:  0;  height: 15vh; }
+
+  .links { margin-top: 1.5rem; }
+  .play { width: 46px; height: 46px; }
+  .play svg { width: 17px; height: 17px; }
+  .controls { gap: 1.25rem; }
+  .player { padding: 0.9rem 1rem 1rem; border-radius: 14px; }
+  .track-title { font-size: 0.98rem; }
+}
+
+/* ============================================================
+   REDUCED MOTION — kill every moving part.
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  .ridge svg, .fog-1, .fog-2, .fog-3, .light {
+    animation: none !important;
+  }
+  .drawer { transition: none; }
+  .intro { transition: none; }
+  * { scroll-behavior: auto !important; }
+}
+</style>
 </head>
+
 <body>
-  <header class="site-header">
-    <a class="brand" href="/">
-      <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
-        <path d="M2 26 L11 10 L16 19 L21 6 L30 26 Z" />
-      </svg>
-      <span>Pahadi Traveller</span>
-    </a>
-    <nav class="site-nav">
-      <a href="#trips">Trips</a>
-      <a href="#about">About</a>
-      <a href="#contact">Contact</a>
-    </nav>
+
+<!-- ============================================================
+     SCENE
+     ============================================================ -->
+<div class="sky"></div>
+
+<div class="scene" aria-hidden="true">
+
+  <div class="sun-glow"></div>
+
+  <!-- Far snow peaks. Every mountain path uses C (Bézier) curves with
+       uneven spacing — symmetric zigzags read as clip-art. -->
+  <div class="ridge ridge-snow">
+    <svg viewBox="0 0 2000 320" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="gSnow" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"   stop-color="#f0e4cf" stop-opacity="0.95" />
+          <stop offset="38%"  stop-color="#cfd8d8" stop-opacity="0.72" />
+          <stop offset="100%" stop-color="#12283a" stop-opacity="0.55" />
+        </linearGradient>
+      </defs>
+      <path fill="url(#gSnow)" d="
+        M 0 235
+        C 60 228, 100 205, 128 168 C 140 150, 146 120, 152 100
+        C 160 122, 172 152, 190 176 C 220 214, 250 200, 296 212
+        C 340 222, 372 196, 404 150 C 424 120, 438 88, 452 58
+        C 466 92, 480 128, 500 158 C 530 202, 560 186, 600 200
+        C 646 216, 680 206, 712 178 C 734 158, 748 132, 764 108
+        C 780 136, 796 168, 818 190 C 848 220, 890 226, 930 230
+        C 958 233, 980 234, 1000 235
+        C 1060 228, 1100 205, 1128 168 C 1140 150, 1146 120, 1152 100
+        C 1160 122, 1172 152, 1190 176 C 1220 214, 1250 200, 1296 212
+        C 1340 222, 1372 196, 1404 150 C 1424 120, 1438 88, 1452 58
+        C 1466 92, 1480 128, 1500 158 C 1530 202, 1560 186, 1600 200
+        C 1646 216, 1680 206, 1712 178 C 1734 158, 1748 132, 1764 108
+        C 1780 136, 1796 168, 1818 190 C 1848 220, 1890 226, 1930 230
+        C 1958 233, 1980 234, 2000 235
+        L 2000 320 L 0 320 Z" />
+    </svg>
+  </div>
+
+  <!-- Second ridge line, hazier and bluer with distance. -->
+  <div class="ridge ridge-far">
+    <svg viewBox="0 0 2000 260" preserveAspectRatio="none">
+      <path fill="var(--pine-far)" opacity="0.88" d="
+        M 0 205
+        C 70 200, 118 178, 152 152 C 166 141, 176 130, 186 118
+        C 198 136, 212 158, 232 174 C 268 202, 300 190, 348 198
+        C 400 206, 440 180, 480 142 C 500 123, 514 110, 528 94
+        C 544 116, 558 140, 578 160 C 612 194, 652 184, 700 194
+        C 750 204, 790 186, 828 164 C 848 152, 864 142, 878 130
+        C 902 152, 934 180, 962 194 C 976 200, 990 203, 1000 205
+        C 1070 200, 1118 178, 1152 152 C 1166 141, 1176 130, 1186 118
+        C 1198 136, 1212 158, 1232 174 C 1268 202, 1300 190, 1348 198
+        C 1400 206, 1440 180, 1480 142 C 1500 123, 1514 110, 1528 94
+        C 1544 116, 1558 140, 1578 160 C 1612 194, 1652 184, 1700 194
+        C 1750 204, 1790 186, 1828 164 C 1848 152, 1864 142, 1878 130
+        C 1902 152, 1934 180, 1962 194 C 1976 200, 1990 203, 2000 205
+        L 2000 260 L 0 260 Z" />
+    </svg>
+  </div>
+
+  <div class="fog fog-2"></div>
+  <div class="fog fog-1"></div>
+
+  <!-- Forested hills, with sparse pine tips breaking the crest. -->
+  <div class="ridge ridge-mid">
+    <svg viewBox="0 0 2000 240" preserveAspectRatio="none">
+      <path fill="var(--pine-mid)" d="
+        M 0 168
+        C 60 162, 106 140, 140 116 C 154 106, 168 98, 178 86
+        C 190 104, 204 124, 224 138 C 262 164, 300 156, 350 162
+        C 402 168, 448 142, 490 116 C 510 103, 526 90, 540 74
+        C 556 96, 570 118, 590 134 C 626 162, 664 152, 712 158
+        C 758 164, 800 146, 838 128 C 858 119, 878 116, 900 110
+        C 934 122, 966 150, 1000 168
+        C 1060 162, 1106 140, 1140 116 C 1154 106, 1168 98, 1178 86
+        C 1190 104, 1204 124, 1224 138 C 1262 164, 1300 156, 1350 162
+        C 1402 168, 1448 142, 1490 116 C 1510 103, 1526 90, 1540 74
+        C 1556 96, 1570 118, 1590 134 C 1626 162, 1664 152, 1712 158
+        C 1758 164, 1800 146, 1838 128 C 1858 119, 1878 116, 1900 110
+        C 1934 122, 1966 150, 2000 168
+        L 2000 240 L 0 240 Z" />
+    </svg>
+  </div>
+
+  <div class="fog fog-3"></div>
+
+  <!-- The road: an S-curve receding toward the ridge, with a warm
+       edge catching the last of the light. -->
+  <div class="road-layer">
+    <svg viewBox="0 0 1000 200" preserveAspectRatio="xMidYMax meet">
+      <defs>
+        <linearGradient id="gRoad" x1="0" y1="1" x2="0" y2="0">
+          <stop offset="0%"   stop-color="#1c242a" stop-opacity="0.92" />
+          <stop offset="60%"  stop-color="#243038" stop-opacity="0.72" />
+          <stop offset="100%" stop-color="#3d4b4d" stop-opacity="0.28" />
+        </linearGradient>
+      </defs>
+      <path fill="url(#gRoad)" d="
+        M 322 200
+        C 392 158, 428 132, 452 104
+        C 472 80, 462 54, 486 26
+        C 496 14, 502 8, 505 2
+        L 527 2
+        C 522 10, 515 20, 509 34
+        C 493 64, 510 88, 530 112
+        C 558 142, 606 174, 664 200 Z" />
+      <!-- The last of the light catching both edges of the tarmac. -->
+      <path fill="none" stroke="var(--sky-glow-soft)" stroke-opacity="0.55" stroke-width="2.2" stroke-linecap="round" d="
+        M 322 200 C 392 158, 428 132, 452 104
+        C 472 80, 462 54, 486 26 C 496 14, 502 8, 505 2" />
+      <path fill="none" stroke="var(--sky-glow)" stroke-opacity="0.34" stroke-width="1.6" stroke-linecap="round" d="
+        M 660 200 C 604 172, 556 140, 528 110
+        C 508 86, 492 62, 508 32 C 514 18, 520 10, 524 2" />
+    </svg>
+  </div>
+
+  <!-- Foreground pines + a few village lights down in the valley. -->
+  <div class="ridge ridge-near">
+    <svg viewBox="0 0 2000 220" preserveAspectRatio="none">
+      <path fill="var(--pine-near)" d="
+        M 0 128
+        C 56 124, 100 106, 132 88 C 144 81, 158 78, 168 70
+        C 180 86, 194 100, 214 110 C 250 128, 292 122, 344 126
+        C 396 130, 444 108, 486 88 C 504 79, 520 74, 532 64
+        C 546 80, 562 94, 584 104 C 620 121, 662 116, 712 122
+        C 756 127, 800 112, 840 102 C 860 97, 878 96, 894 92
+        C 930 100, 968 116, 1000 128
+        C 1056 124, 1100 106, 1132 88 C 1144 81, 1158 78, 1168 70
+        C 1180 86, 1194 100, 1214 110 C 1250 128, 1292 122, 1344 126
+        C 1396 130, 1444 108, 1486 88 C 1504 79, 1520 74, 1532 64
+        C 1546 80, 1562 94, 1584 104 C 1620 121, 1662 116, 1712 122
+        C 1756 127, 1800 112, 1840 102 C 1860 97, 1878 96, 1894 92
+        C 1930 100, 1968 116, 2000 128
+        L 2000 220 L 0 220 Z" />
+
+      <!-- Pines standing on the crest. Trees, so straighter than the
+           mountains — but still tapered rather than flat triangles. -->
+      <g fill="var(--pine-near)">
+        <path d="M 85 102 C 89 84, 90 68, 92 58 C 94 68, 95 84, 99 102 Z" />
+        <path d="M 243 128 C 247 111, 248 96, 250 86 C 252 96, 253 111, 257 128 Z" />
+        <path d="M 473 92 C 477 74, 478 58, 480 48 C 482 58, 483 74, 487 92 Z" />
+        <path d="M 683 123 C 687 107, 688 92, 690 83 C 692 92, 693 107, 697 123 Z" />
+        <path d="M 865 98 C 869 83, 870 69, 872 60 C 874 69, 875 83, 879 98 Z" />
+        <path d="M 1085 102 C 1089 84, 1090 68, 1092 58 C 1094 68, 1095 84, 1099 102 Z" />
+        <path d="M 1243 128 C 1247 111, 1248 96, 1250 86 C 1252 96, 1253 111, 1257 128 Z" />
+        <path d="M 1473 92 C 1477 74, 1478 58, 1480 48 C 1482 58, 1483 74, 1487 92 Z" />
+        <path d="M 1683 123 C 1687 107, 1688 92, 1690 83 C 1692 92, 1693 107, 1697 123 Z" />
+        <path d="M 1865 98 C 1869 83, 1870 69, 1872 60 C 1874 69, 1875 83, 1879 98 Z" />
+      </g>
+
+      <!-- A few houses still awake, down in the valley. -->
+      <g fill="var(--sky-glow-soft)">
+        <circle class="light" cx="352"  cy="142" r="1.7" style="animation-delay:0s" />
+        <circle class="light" cx="386"  cy="148" r="1.4" style="animation-delay:1.3s" />
+        <circle class="light" cx="620"  cy="134" r="1.6" style="animation-delay:2.6s" />
+        <circle class="light" cx="1352" cy="142" r="1.7" style="animation-delay:0.7s" />
+        <circle class="light" cx="1386" cy="148" r="1.4" style="animation-delay:2.1s" />
+        <circle class="light" cx="1620" cy="134" r="1.6" style="animation-delay:3.4s" />
+      </g>
+    </svg>
+  </div>
+</div>
+
+<div class="vignette" aria-hidden="true"></div>
+
+<!-- ============================================================
+     PAGE
+     ============================================================ -->
+<div class="grid">
+
+  <header class="topbar">
+    <span class="clock" id="clock" aria-live="off"></span>
+    <span class="online"><span class="dot"></span><span id="online-count">24</span> driving</span>
   </header>
 
-  <main>
-    <section class="hero">
-      <div class="hero-inner">
-        <p class="eyebrow">Slow travel in the Indian Himalayas</p>
-        <h1>Go where the road ends.</h1>
-        <p class="lede">
-          Small-group treks, village homestays and unhurried itineraries across
-          Uttarakhand and Himachal — planned by people who grew up in these hills.
-        </p>
-        <div class="cta-row">
-          <a class="btn btn-primary" href="#trips">Browse trips</a>
-          <a class="btn btn-ghost" href="#contact">Plan a custom trip</a>
-        </div>
-      </div>
-      <div class="hero-ridge" aria-hidden="true"></div>
-    </section>
+  <main class="center">
+    <h1 class="wordmark-hi">पहाड़ी ड्राइव</h1>
+    <p class="wordmark-en">Pahadi · Drive</p>
+    <p class="tagline">“Music from the hills, for anyone far from them.”</p>
 
-    <section id="trips" class="section">
-      <h2>Featured journeys</h2>
-      <p class="section-sub">A few routes we run every season.</p>
-      <div class="grid">
-        <article class="card">
-          <div class="card-tag">Uttarakhand · 6 days</div>
-          <h3>Valley of Flowers</h3>
-          <p>Monsoon meadows above Ghangaria, with a day hike to Hemkund Sahib.</p>
-          <div class="card-meta">Moderate · Jul–Sep</div>
-        </article>
-        <article class="card">
-          <div class="card-tag">Uttarakhand · 7 days</div>
-          <h3>Kuari Pass</h3>
-          <p>The classic Curzon Trail ridge walk facing Nanda Devi and Dronagiri.</p>
-          <div class="card-meta">Easy–Moderate · Dec–Apr</div>
-        </article>
-        <article class="card">
-          <div class="card-tag">Himachal · 9 days</div>
-          <h3>Spiti Circuit</h3>
-          <p>High desert villages, thousand-year-old monasteries and cold-night skies.</p>
-          <div class="card-meta">Road trip · Jun–Sep</div>
-        </article>
-        <article class="card">
-          <div class="card-tag">Uttarakhand · 4 days</div>
-          <h3>Kumaon Homestays</h3>
-          <p>Orchards, stone houses and slow mornings between Binsar and Munsiyari.</p>
-          <div class="card-meta">Relaxed · Year-round</div>
-        </article>
-      </div>
-    </section>
-
-    <section id="about" class="section section-alt">
-      <div class="about-grid">
-        <div>
-          <h2>Why Pahadi Traveller</h2>
-          <p>
-            We are a small outfit from the hills. Every trip is run with local guides,
-            local kitchens and local homes — so the money stays where the mountains are.
-          </p>
-        </div>
-        <ul class="points">
-          <li><strong>Local first.</strong> Guides, cooks and stays from the valleys we walk.</li>
-          <li><strong>Small groups.</strong> Ten travellers, never more.</li>
-          <li><strong>Leave no trace.</strong> We carry our waste back down. All of it.</li>
-        </ul>
-      </div>
-    </section>
-
-    <section id="contact" class="section">
-      <h2>Plan your trip</h2>
-      <p class="section-sub">
-        Tell us when you want to travel and how far you want to walk.
-      </p>
-      <p class="contact-line">
-        <a class="btn btn-primary" href="mailto:hello@pahaditraveller.com">hello@pahaditraveller.com</a>
-      </p>
-    </section>
+    <nav class="links" aria-label="Listen elsewhere">
+      <a href="https://open.spotify.com/search/garhwali%20kumaoni" target="_blank" rel="noopener noreferrer" aria-label="Search pahadi music on Spotify">
+        <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm4.586 14.424a.622.622 0 01-.857.207c-2.348-1.435-5.304-1.76-8.785-.964a.622.622 0 11-.277-1.215c3.809-.871 7.077-.496 9.712 1.115a.623.623 0 01.207.857zm1.223-2.723a.78.78 0 01-1.072.257c-2.687-1.652-6.785-2.13-9.965-1.166a.78.78 0 11-.452-1.492c3.632-1.102 8.147-.568 11.232 1.329a.78.78 0 01.257 1.072zm.105-2.835c-3.223-1.914-8.54-2.09-11.617-1.156a.935.935 0 11-.542-1.79c3.532-1.072 9.404-.865 13.115 1.338a.935.935 0 01-.956 1.608z"/></svg>
+      </a>
+      <a href="https://music.youtube.com/search?q=garhwali+kumaoni+folk" target="_blank" rel="noopener noreferrer" aria-label="Search pahadi music on YouTube Music">
+        <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 18.2a8.2 8.2 0 110-16.4 8.2 8.2 0 010 16.4zM9.9 8.4v7.2l6.3-3.6-6.3-3.6z"/></svg>
+      </a>
+      <button id="links-playlist" aria-label="Open the playlist">
+        <svg viewBox="0 0 24 24"><path d="M3 6h12v2H3V6zm0 5h12v2H3v-2zm0 5h8v2H3v-2zm15-9v6.6a3 3 0 10 1.8 2.75V8h2.2V6H18z"/></svg>
+      </button>
+    </nav>
   </main>
 
-  <footer class="site-footer">
-    <p>&copy; <span id="year">2026</span> Pahadi Traveller</p>
-    <p class="footer-note">Made in the hills.</p>
-  </footer>
+  <section class="player" aria-label="Music player">
+    <div class="player-head">
+      <span>Now Playing</span>
+      <button class="drawer-toggle" id="drawer-toggle" aria-expanded="false" aria-controls="drawer">
+        <span>Playlist</span>
+        <svg viewBox="0 0 24 24"><path d="M12 8l6 8H6l6-8z"/></svg>
+      </button>
+    </div>
 
-  <script>
-    document.getElementById('year').textContent = new Date().getFullYear();
-  </script>
+    <p class="track-title" id="track-title">—</p>
+    <p class="track-artist" id="track-artist">—</p>
+
+    <div class="progress-row">
+      <span id="time-now">0:00</span>
+      <div class="progress" id="progress" role="slider" tabindex="0"
+           aria-label="Seek" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+        <div class="progress-track"></div>
+        <div class="progress-fill" id="progress-fill"></div>
+        <div class="progress-knob" id="progress-knob"></div>
+      </div>
+      <span id="time-total">0:00</span>
+    </div>
+
+    <div class="controls">
+      <button class="ctrl" id="btn-shuffle" aria-label="Shuffle" aria-pressed="false">
+        <svg viewBox="0 0 24 24"><path d="M17 3l4 4-4 4V8h-2.3c-1 0-1.6.4-2.3 1.4l-1 1.5-1.2-1.8 0.8-1.2C12.1 6.2 13.3 6 15 6h2V3zM3 6h3c1.7 0 2.9.2 4 1.9l4.2 6.2c.7 1 1.3 1.4 2.3 1.4H21v2h-4.5c-1.7 0-2.9-.2-4-1.9L8.3 9.4C7.6 8.4 7 8 6 8H3V6zm14 9l4 4-4 4v-3h-2v-2h2v-3zM3 16h3c1 0 1.6-.4 2.3-1.4l.9-1.3 1.2 1.8-.7 1C8.9 17.8 7.7 18 6 18H3v-2z"/></svg>
+      </button>
+      <button class="ctrl" id="btn-prev" aria-label="Previous track">
+        <svg viewBox="0 0 24 24"><path d="M7 6h2v12H7V6zm3 6l9-6v12l-9-6z"/></svg>
+      </button>
+      <button class="play" id="btn-play" aria-label="Play">
+        <svg id="icon-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7L8 5z"/></svg>
+        <svg id="icon-pause" viewBox="0 0 24 24" style="display:none"><path d="M7 5h3.5v14H7V5zm6.5 0H17v14h-3.5V5z"/></svg>
+      </button>
+      <button class="ctrl" id="btn-next" aria-label="Next track">
+        <svg viewBox="0 0 24 24"><path d="M15 6h2v12h-2V6zM5 6l9 6-9 6V6z"/></svg>
+      </button>
+      <button class="ctrl" id="btn-playlist" aria-label="Open the playlist">
+        <svg viewBox="0 0 24 24"><path d="M3 6h12v2H3V6zm0 5h12v2H3v-2zm0 5h8v2H3v-2zm15-9v6.6a3 3 0 101.8 2.75V8h2.2V6H18z"/></svg>
+      </button>
+    </div>
+  </section>
+</div>
+
+<!-- ============================================================
+     PLAYLIST DRAWER
+     ============================================================ -->
+<div class="backdrop" id="backdrop"></div>
+<aside class="drawer" id="drawer" aria-label="Playlist" aria-hidden="true">
+  <div class="drawer-grip" id="drawer-grip"><span></span></div>
+  <div class="drawer-head">
+    <span>The Drive</span>
+    <span id="drawer-count"></span>
+  </div>
+  <div class="tracklist" id="tracklist"></div>
+</aside>
+
+<!-- ============================================================
+     INTRO
+     ============================================================ -->
+<div class="intro" id="intro">
+  <div class="intro-inner">
+    <p class="intro-hi">पहाड़ी ड्राइव</p>
+    <p class="intro-sub">Roll the window down.</p>
+    <button class="begin" id="begin">Begin the drive</button>
+  </div>
+</div>
+
+<div id="yt-player"></div>
+<p class="sr-only" id="live-region" role="status" aria-live="polite"></p>
+
+<script>
+/* ================================================================
+   THE PLAYLIST
+
+   This is the one thing you'll edit regularly. To add a song:
+
+     1. Open the song on YouTube.
+     2. Copy the 11 characters after "v=" in the address bar.
+        e.g. youtube.com/watch?v=4FYT0TIZfnI  ->  4FYT0TIZfnI
+     3. Add a line below in the same shape as the others.
+
+   region can be 'garhwali', 'kumaoni' or 'folk' — it shows as the
+   little tag on the right of each row in the playlist drawer.
+
+   Every ID below was checked against YouTube before being added.
+   If a song ever stops playing, it was probably taken down — the
+   player skips it automatically, but you can delete the line.
+   ================================================================ */
+const PLAYLIST = [
+  // --- Traditional & classics ---
+  { id: '4FYT0TIZfnI', title: 'Bedu Pako Baro Masa',   artist: 'Mahima Thakur',             region: 'kumaoni'  },
+  { id: 'qhJ2htuDjlg', title: 'Chaita Ki Chaitwali',   artist: 'Amit Saagar',               region: 'garhwali' },
+  { id: 'CTSrsQ7WIms', title: 'Ghughuti Na Basa',      artist: 'Traditional',               region: 'kumaoni'  },
+  { id: 'SWcwtQGHYLg', title: 'Jhumelo',               artist: 'Madhuri Barthwal',          region: 'garhwali' },
+  { id: 'd31rTvI83_0', title: 'Jhumelo (Folk Dance)',  artist: 'Mahila Navjagran Samiti',   region: 'folk'     },
+  { id: 'D7E-3p6E5y8', title: 'Ni Basa Ghughuti Aam Ki', artist: 'Balveer Rana',            region: 'kumaoni'  },
+  { id: 'L8UFkhWpCs0', title: 'Bedu Pako',             artist: 'Revoic & Suneet Rawat',     region: 'kumaoni'  },
+
+  // --- Narendra Singh Negi ---
+  { id: 'hpnhPhmRyc8', title: 'Bol Chitthi Kile Ni Bheji', artist: 'Narendra Singh Negi',   region: 'garhwali' },
+  { id: 'S-Q8YOdkaIA', title: 'Kwi Ta Baat Holi',      artist: 'Narendra Singh Negi',       region: 'garhwali' },
+  { id: 'Y5H5tDbPMsQ', title: 'Nauchami Narena',       artist: 'Narendra Singh Negi',       region: 'garhwali' },
+
+  // --- Modern pahadi ---
+  { id: '0hS7ti5PS5A', title: 'Dhana',                 artist: 'Priyanka Meher & Rongpaz',  region: 'garhwali' },
+  { id: '1meWAlonXhw', title: 'Gajra',                 artist: 'Sanjay Bhandari & Anisha Ranghar', region: 'garhwali' },
+  { id: 'hOA7yo3Cz6A', title: 'Tu Meri Pahadan',       artist: 'Inder Arya & Jyoti Arya',   region: 'kumaoni'  },
+  { id: 'O7F763U7IYA', title: 'Main Pahadi Choun',     artist: 'Pritam Bhartwan',           region: 'garhwali' },
+  { id: 'DeWT408Z9bg', title: 'Aulu Jarur',            artist: 'Pritam Bhartwan',           region: 'garhwali' },
+  { id: 'IXEqL_DK0wc', title: 'Chandri Tera Gaun',     artist: 'Pritam Bhartwan & Meena Rana', region: 'garhwali' },
+  { id: 'AwESlAx6py8', title: 'Ghuguti Ghuraona Laigi', artist: 'Meena Rana',               region: 'garhwali' },
+  { id: 'Bq9anW9n5DY', title: 'Baje De Mashakbeena',   artist: 'Meena Rana',                region: 'garhwali' },
+  { id: 'rL9LnS9Mvzw', title: 'Hit Rupa',              artist: 'Pappu Karki',               region: 'kumaoni'  },
+  { id: 'pUfSASuTdVI', title: 'Eja Re',                artist: 'Pappu Karki',               region: 'kumaoni'  },
+  { id: '47LQmhaOdtA', title: 'Sun Le Dagadiya',       artist: 'Pappu Karki',               region: 'kumaoni'  },
+];
+
+/* ================================================================
+   STATE — plain variables, no storage anywhere.
+   ================================================================ */
+let player = null;          // the YouTube player object, once it's ready
+let playerReady = false;
+let current = 0;            // which track in PLAYLIST we're on
+let isPlaying = false;
+let shuffle = false;
+let drawerOpen = false;
+let dragging = false;       // true while the user drags the progress bar
+let errorStreak = 0;        // guards against looping through a dead playlist
+let ticker = null;          // interval that updates the progress bar
+
+/* ---------- small helpers ---------- */
+
+// Track titles come from the list above and get written with innerHTML,
+// so escape them first. Cheap insurance.
+function escapeHTML(s) {
+  return String(s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+function formatTime(sec) {
+  if (!isFinite(sec) || sec < 0) sec = 0;
+  const m = Math.floor(sec / 60);
+  const s = Math.floor(sec % 60);
+  return m + ':' + String(s).padStart(2, '0');
+}
+
+const $ = (id) => document.getElementById(id);
+
+/* ================================================================
+   THE CLOCK — 12-hour, with a smaller AM/PM. Ticks every 15s.
+   ================================================================ */
+function updateClock() {
+  const now = new Date();
+  let h = now.getHours();
+  const m = String(now.getMinutes()).padStart(2, '0');
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  h = h % 12 || 12;
+  $('clock').innerHTML = h + ':' + m + '<span class="ampm">' + ampm + '</span>';
+}
+updateClock();
+setInterval(updateClock, 15000);
+
+/* ================================================================
+   ONLINE COUNTER
+
+   There's no backend, so this cannot be a real count — it's a
+   random walk that drifts back toward 26 and stays in a plausible
+   band. Honest about what it is: atmosphere, not data.
+   ================================================================ */
+let online = 18 + Math.floor(Math.random() * 21);   // 18–38
+function updateOnline() {
+  const pull = (26 - online) * 0.14;               // gentle pull home
+  const noise = (Math.random() - 0.5) * 2.6;
+  online = Math.round(Math.max(11, Math.min(46, online + pull + noise)));
+  $('online-count').textContent = online;
+}
+updateOnline();
+setInterval(updateOnline, 4200);
+
+/* ================================================================
+   PLAYLIST DRAWER
+   ================================================================ */
+function renderTracklist() {
+  const html = PLAYLIST.map((t, i) => (
+    '<button class="track' + (i === current ? ' current' : '') + '" data-i="' + i + '">' +
+      '<span class="track-num">' + String(i + 1).padStart(2, '0') + '</span>' +
+      '<span class="track-body">' +
+        '<span class="track-name">' + escapeHTML(t.title) + '</span>' +
+        '<span class="track-by">' + escapeHTML(t.artist) + '</span>' +
+      '</span>' +
+      '<span class="pill">' + escapeHTML(t.region) + '</span>' +
+    '</button>'
+  )).join('');
+  $('tracklist').innerHTML = html;
+  $('drawer-count').textContent = PLAYLIST.length + ' songs';
+}
+
+function setDrawer(open) {
+  drawerOpen = open;
+  $('drawer').classList.toggle('open', open);
+  $('backdrop').classList.toggle('open', open);
+  $('drawer').setAttribute('aria-hidden', String(!open));
+  $('drawer-toggle').setAttribute('aria-expanded', String(open));
+}
+
+$('tracklist').addEventListener('click', (e) => {
+  const row = e.target.closest('.track');
+  if (!row) return;
+  playTrack(Number(row.dataset.i));
+  setDrawer(false);
+});
+
+$('drawer-toggle').addEventListener('click', () => setDrawer(!drawerOpen));
+$('btn-playlist').addEventListener('click', () => setDrawer(!drawerOpen));
+$('links-playlist').addEventListener('click', () => setDrawer(!drawerOpen));
+$('backdrop').addEventListener('click', () => setDrawer(false));
+
+/* Swipe the drawer down to close it (phones). */
+let touchStartY = null;
+$('drawer').addEventListener('touchstart', (e) => { touchStartY = e.touches[0].clientY; }, { passive: true });
+$('drawer').addEventListener('touchmove', (e) => {
+  if (touchStartY === null) return;
+  if (e.touches[0].clientY - touchStartY > 60) { setDrawer(false); touchStartY = null; }
+}, { passive: true });
+$('drawer').addEventListener('touchend', () => { touchStartY = null; }, { passive: true });
+
+/* ================================================================
+   YOUTUBE PLAYER
+
+   The iframe is real but parked off-screen; all the controls you
+   see are our own HTML. This is the official IFrame Player API, so
+   plays still count for the artists.
+   ================================================================ */
+const tag = document.createElement('script');
+tag.src = 'https://www.youtube.com/iframe_api';
+document.head.appendChild(tag);
+
+// The API calls this global when it has finished loading.
+window.onYouTubeIframeAPIReady = function () {
+  player = new YT.Player('yt-player', {
+    videoId: PLAYLIST[0].id,
+    playerVars: {
+      controls: 0, modestbranding: 1, playsinline: 1,
+      rel: 0, iv_load_policy: 3, disablekb: 1
+    },
+    events: {
+      onReady: onPlayerReady,
+      onStateChange: onPlayerStateChange,
+      onError: onPlayerError
+    }
+  });
+};
+
+function onPlayerReady() {
+  playerReady = true;
+  updateNowPlaying();
+}
+
+function onPlayerStateChange(e) {
+  if (e.data === YT.PlayerState.PLAYING) {
+    isPlaying = true;
+    errorStreak = 0;          // a successful play clears the error guard
+    setPlayIcon(true);
+    startTicker();
+  } else if (e.data === YT.PlayerState.PAUSED) {
+    isPlaying = false;
+    setPlayIcon(false);
+    stopTicker();
+  } else if (e.data === YT.PlayerState.ENDED) {
+    next();
+  }
+}
+
+/* Codes 2, 5, 100, 101 and 150 all mean "this video won't play here"
+   — removed, private, or embedding turned off. Skip to the next one
+   rather than sitting on a dead track. The streak counter stops a
+   completely broken playlist from spinning forever. */
+function onPlayerError(e) {
+  const dead = [2, 5, 100, 101, 150];
+  if (!dead.includes(e.data)) return;
+  errorStreak++;
+  if (errorStreak >= PLAYLIST.length) {
+    $('track-title').textContent = 'Nothing here will play';
+    $('track-artist').textContent = 'Check the song list';
+    stopTicker();
+    return;
+  }
+  next();
+}
+
+/* ================================================================
+   TRANSPORT
+   ================================================================ */
+function updateNowPlaying() {
+  const t = PLAYLIST[current];
+  $('track-title').textContent = t.title;
+  $('track-artist').textContent = t.artist;
+  $('live-region').textContent = t.title + ' by ' + t.artist;
+  document.querySelectorAll('.track').forEach((el, i) => {
+    el.classList.toggle('current', i === current);
+  });
+}
+
+function playTrack(i) {
+  current = (i + PLAYLIST.length) % PLAYLIST.length;
+  updateNowPlaying();
+  if (!playerReady) return;
+  player.loadVideoById(PLAYLIST[current].id);
+  isPlaying = true;
+  setPlayIcon(true);
+}
+
+function next() {
+  if (shuffle && PLAYLIST.length > 1) {
+    let n = current;
+    while (n === current) n = Math.floor(Math.random() * PLAYLIST.length);
+    playTrack(n);
+  } else {
+    playTrack(current + 1);
+  }
+}
+
+/* Standard music-player behaviour: more than 3 seconds in, the
+   previous button restarts the current song instead of going back. */
+function prev() {
+  if (playerReady && player.getCurrentTime && player.getCurrentTime() > 3) {
+    player.seekTo(0, true);
+    return;
+  }
+  playTrack(current - 1);
+}
+
+function togglePlay() {
+  if (!playerReady) return;
+  if (isPlaying) player.pauseVideo();
+  else player.playVideo();
+}
+
+function setPlayIcon(playing) {
+  $('icon-play').style.display  = playing ? 'none' : '';
+  $('icon-pause').style.display = playing ? '' : 'none';
+  $('btn-play').setAttribute('aria-label', playing ? 'Pause' : 'Play');
+}
+
+$('btn-play').addEventListener('click', togglePlay);
+$('btn-next').addEventListener('click', next);
+$('btn-prev').addEventListener('click', prev);
+$('btn-shuffle').addEventListener('click', () => {
+  shuffle = !shuffle;
+  $('btn-shuffle').classList.toggle('is-on', shuffle);
+  $('btn-shuffle').setAttribute('aria-pressed', String(shuffle));
+});
+
+/* ================================================================
+   PROGRESS BAR
+   ================================================================ */
+function startTicker() { stopTicker(); ticker = setInterval(tick, 250); }
+function stopTicker()  { if (ticker) { clearInterval(ticker); ticker = null; } }
+
+function tick() {
+  if (!playerReady || dragging || !player.getDuration) return;
+  const dur = player.getDuration() || 0;
+  const now = player.getCurrentTime() || 0;
+  setProgress(dur ? (now / dur) * 100 : 0);
+  $('time-now').textContent = formatTime(now);
+  $('time-total').textContent = formatTime(dur);
+}
+
+function setProgress(pct) {
+  pct = Math.max(0, Math.min(100, pct));
+  $('progress-fill').style.width = pct + '%';
+  $('progress-knob').style.left = pct + '%';
+  $('progress').setAttribute('aria-valuenow', Math.round(pct));
+}
+
+function seekFromPointer(clientX) {
+  const r = $('progress').getBoundingClientRect();
+  const pct = ((clientX - r.left) / r.width) * 100;
+  setProgress(pct);
+  return pct;
+}
+
+// Pointer events cover mouse, touch and pen in one path.
+$('progress').addEventListener('pointerdown', (e) => {
+  if (!playerReady) return;
+  dragging = true;
+  $('progress').classList.add('dragging');
+  $('progress').setPointerCapture(e.pointerId);
+  seekFromPointer(e.clientX);
+});
+$('progress').addEventListener('pointermove', (e) => {
+  if (!dragging) return;
+  const pct = seekFromPointer(e.clientX);
+  const dur = player.getDuration() || 0;
+  $('time-now').textContent = formatTime((pct / 100) * dur);
+});
+$('progress').addEventListener('pointerup', (e) => {
+  if (!dragging) return;
+  const pct = seekFromPointer(e.clientX);
+  const dur = player.getDuration() || 0;
+  player.seekTo((pct / 100) * dur, true);
+  dragging = false;
+  $('progress').classList.remove('dragging');
+});
+$('progress').addEventListener('pointercancel', () => {
+  dragging = false;
+  $('progress').classList.remove('dragging');
+});
+
+// Arrow keys nudge the playhead when the bar itself has focus.
+$('progress').addEventListener('keydown', (e) => {
+  if (!playerReady) return;
+  if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+  e.preventDefault();
+  e.stopPropagation();
+  const dur = player.getDuration() || 0;
+  const now = player.getCurrentTime() || 0;
+  player.seekTo(Math.max(0, Math.min(dur, now + (e.key === 'ArrowRight' ? 5 : -5))), true);
+});
+
+/* ================================================================
+   KEYBOARD
+   Space play/pause · arrows prev/next · P playlist · Esc close
+   ================================================================ */
+document.addEventListener('keydown', (e) => {
+  if (e.target.closest('.progress')) return;   // the bar handles its own arrows
+  const k = e.key.toLowerCase();
+  if (e.code === 'Space')      { e.preventDefault(); togglePlay(); }
+  else if (e.key === 'ArrowLeft')  { prev(); }
+  else if (e.key === 'ArrowRight') { next(); }
+  else if (k === 'p')          { setDrawer(!drawerOpen); }
+  else if (e.key === 'Escape') { setDrawer(false); }
+});
+
+/* ================================================================
+   INTRO
+
+   Browsers won't let a page make noise until someone interacts with
+   it. This button is that interaction — it's why the overlay exists.
+   ================================================================ */
+$('begin').addEventListener('click', () => {
+  $('intro').classList.add('gone');
+  if (playerReady) {
+    player.playVideo();
+  } else {
+    // API still loading — start as soon as it's ready.
+    const waitForPlayer = setInterval(() => {
+      if (playerReady) { clearInterval(waitForPlayer); player.playVideo(); }
+    }, 120);
+  }
+});
+
+/* ---------- go ---------- */
+renderTracklist();
+updateNowPlaying();
+</script>
 </body>
 </html>
