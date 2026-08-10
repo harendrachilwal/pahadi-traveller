@@ -294,6 +294,40 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
   50%      { opacity: 0.30; }
 }
 
+/* ============================================================
+   BACKGROUND PHOTOS
+   If poster images named bg-flowers.jpg, bg-lake.jpg and bg-road.jpg
+   sit next to index.html, they become the full-screen background,
+   slowly crossfading, and the drawn hills switch off. If the files
+   aren't there, the drawn scene stays — the site never looks broken.
+   ============================================================ */
+.photo-bg { position: fixed; inset: 0; display: none; }
+body.has-photos .photo-bg { display: block; }
+
+.photo {
+  position: absolute; inset: 0;
+  background-size: cover;
+  background-position: center 32%;   /* keep the peaks in frame when cropping */
+  opacity: 0;
+  transition: opacity 3s ease;
+}
+.photo.showing { opacity: 1; }
+
+/* With photos up, the drawn scene is invisible anyway — switching it
+   off also stops its animations, which phones will thank us for. */
+body.has-photos .scene,
+body.has-photos .roadside { display: none; }
+
+/* A gentle darkening at the bottom so the player card and titles stay
+   readable over whatever the photo has going on down there. */
+.photo-scrim {
+  position: absolute; inset: 0;
+  background: linear-gradient(to bottom, rgba(60,46,26,0.10), transparent 30%, transparent 55%, rgba(52,40,22,0.30));
+}
+body.has-photos .wordmark-hi { text-shadow: 0 1px 14px rgba(250,244,226,0.85), 0 0 2px rgba(250,244,226,0.9); }
+body.has-photos .wordmark-en,
+body.has-photos .tagline { text-shadow: 0 1px 8px rgba(250,244,226,0.9); }
+
 /* Sepia edge-darkening — an old print, not a night sky. */
 .vignette {
   position: fixed; inset: 0; pointer-events: none;
@@ -891,6 +925,9 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
   </div>
 </div>
 
+<!-- Full-screen poster photos, if the image files exist (see script). -->
+<div class="photo-bg" id="photo-bg" aria-hidden="true"><div class="photo-scrim"></div></div>
+
 <!-- The two shops at the bend. -->
 <div class="roadside" aria-hidden="true">
   <svg viewBox="0 0 400 200" preserveAspectRatio="xMinYMax meet">
@@ -1210,6 +1247,59 @@ function updateOnline() {
 }
 updateOnline();
 setInterval(updateOnline, 4200);
+
+/* ================================================================
+   BACKGROUND PHOTOS
+
+   To use full-screen poster images as the background, put JPEGs with
+   these exact names in the same folder as this file:
+
+       bg-flowers.jpg    bg-lake.jpg    bg-road.jpg
+
+   (One is enough; any that exist are used.) The photos slowly
+   crossfade, and the hand-drawn hills switch off automatically.
+   Delete the image files and the drawn scene comes back. Nothing
+   else to configure.
+   ================================================================ */
+const PHOTOS = ['bg-flowers.jpg', 'bg-lake.jpg', 'bg-road.jpg'];
+
+(function () {
+  const holder = document.getElementById('photo-bg');
+  const scrim  = holder.querySelector('.photo-scrim');
+  const loaded = [];          // the photo divs that actually loaded
+  let   shown  = 0;           // which one is currently visible
+  let   started = false;
+  const stillness = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function tick() {
+    if (loaded.length < 2) return;              // nothing to rotate to
+    loaded[shown].classList.remove('showing');
+    shown = (shown + 1) % loaded.length;
+    loaded[shown].classList.add('showing');
+  }
+
+  function startShow() {
+    if (started) return;
+    started = true;
+    document.body.classList.add('has-photos');  // hides the drawn hills
+    loaded[0].classList.add('showing');
+    if (!stillness) setInterval(tick, 16000);   // slow, unhurried fades
+  }
+
+  PHOTOS.forEach(function (src) {
+    const probe = new Image();
+    probe.onload = function () {
+      const d = document.createElement('div');
+      d.className = 'photo';
+      d.style.backgroundImage = "url('" + src + "')";
+      holder.insertBefore(d, scrim);            // scrim stays on top
+      loaded.push(d);
+      startShow();
+    };
+    // If the file isn't there, nothing happens — the drawn scene stays.
+    probe.src = src;
+  });
+})();
 
 /* ================================================================
    PLAYLIST DRAWER

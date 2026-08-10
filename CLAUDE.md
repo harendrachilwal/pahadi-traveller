@@ -33,8 +33,11 @@ If you think a change requires breaking one of these, **stop and ask first.** Do
 
 ```
 pahadi-drive/
-├── index.html    ← everything lives here
-└── README.md     ← setup + how to add songs
+├── index.html       ← everything lives here
+├── README.md        ← setup + how to add songs
+├── bg-flowers.jpg   ← optional full-screen background posters —
+├── bg-lake.jpg      ←   if present they replace the drawn scene
+└── bg-road.jpg      ←   (see BACKGROUND PHOTOS in the script)
 ```
 
 That's it. Don't create `src/`, `components/`, `styles/`, or `assets/` directories.

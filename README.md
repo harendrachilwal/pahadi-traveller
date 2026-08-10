@@ -64,6 +64,26 @@ tidy up.
 
 ---
 
+## Using your poster images as the background
+
+The site can use full-screen poster images instead of the drawn hills. Put
+JPEGs with these exact names next to `index.html` in the repo:
+
+```
+bg-flowers.jpg     bg-lake.jpg     bg-road.jpg
+```
+
+Easiest way: on the GitHub page of this repo press **Add file → Upload
+files**, drag the images in, rename them to match, and commit. Vercel
+redeploys on its own within a minute.
+
+- One image is enough — whichever of the three exist are used.
+- With more than one, they slowly crossfade every 16 seconds.
+- The drawn hills switch off automatically while photos are present;
+  delete the image files and the hills come back.
+- Keep each JPEG under ~500 KB if you can (export at around 2000px wide) so
+  phones load them fast.
+
 ## Changing how it looks
 
 **Colours.** Search for `COLOR TOKENS` at the very top of the file. Every
