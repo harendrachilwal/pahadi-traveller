@@ -72,6 +72,13 @@ Defined as CSS custom properties on `:root`. Use these — don't invent new colo
 --border-strong:  rgba(234, 223, 203, 0.22);
 ```
 
+**Retro extension (added later):** the roadside shops and vehicles needed a
+few colours a silhouette can't provide. They live in a clearly-marked block
+after the tokens above — `--retro-bus`, `--retro-bus-trim`, `--retro-roof`,
+`--sign-board`, `--sign-paint`, `--window-lit`, `--dust`. The original dusk
+tokens are unchanged; use the retro set only for the roadside cluster and
+traffic, never for sky or ridges.
+
 ### Typography
 
 Four faces, loaded from Google Fonts in one `<link>`:

@@ -46,6 +46,20 @@
   --glass-strong:   rgba(10, 18, 24, 0.62);
   --border:         rgba(234, 223, 203, 0.13);
   --border-strong:  rgba(234, 223, 203, 0.22);
+
+  /* --- Retro extension -------------------------------------
+     The palette above is all silhouette and sky. These few are
+     for the roadside things a silhouette can't say: a weathered
+     bus, a hand-painted signboard, a lit shop window. Nothing
+     above was changed — this only adds.
+     --------------------------------------------------------- */
+  --retro-bus:      #cdc0a4;   /* sun-bleached cream bodywork */
+  --retro-bus-trim: #a2503a;   /* faded red stripe */
+  --retro-roof:     #6b5b47;   /* rusted tin */
+  --sign-board:     #7c4a2a;   /* painted board */
+  --sign-paint:     #f2e3c4;   /* the lettering on it */
+  --window-lit:     #f0b96a;   /* kerosene-ish interior light */
+  --dust:           #8a7a63;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -117,15 +131,22 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 .ridge { position: absolute; left: 0; width: 100%; overflow: hidden; }
 .ridge svg { display: block; width: 200%; height: 100%; }
 
-.ridge-snow { bottom: 26%; height: 26vh; }
+.ridge-snow { bottom: 22%; height: 34vh; }
 .ridge-far  { bottom: 19%; height: 24vh; }
 .ridge-mid  { bottom: 10%; height: 22vh; }
 .ridge-near { bottom:  0;  height: 17vh; }
 
+/* Nanda Devi is a real, recognisable mountain, so unlike the other
+   layers she is drawn once and does not drift — repeat her to make the
+   loop seamless and you would see two of her side by side. Standing
+   still is also the honest choice: a massif that far away barely shifts
+   as you drive, so pinning her while the nearer ridges slide is what
+   actually creates the depth. */
+.ridge-snow svg { width: 100%; }
+
 /* The animation goes on the SVG, never on .ridge — .ridge is the window
    that crops it. Move the window and its clip edge travels too, dragging
    a hard vertical seam across the scene. */
-.ridge-snow svg { animation: drift 30s linear infinite; }
 .ridge-far  svg { animation: drift 24s linear infinite; }
 .ridge-mid  svg { animation: drift 18s linear infinite; }
 .ridge-near svg { animation: drift 14s linear infinite; }
@@ -137,8 +158,89 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
   to   { transform: translateX(-50%); }
 }
 
-.road-layer { position: absolute; left: 0; bottom: 8%; width: 100%; height: 21vh; overflow: hidden; }
-.road-layer svg { display: block; width: 100%; height: 100%; }
+/* ============================================================
+   THE SNAKE ROAD
+   The stage below is exactly 640x300 CSS pixels and is then scaled
+   as a whole. That fixed size is the trick that makes the traffic
+   work: CSS offset-path measures in real pixels, not SVG units, so
+   with the stage at 1:1 the very same path data can draw the road
+   AND steer the vehicles along it. Scaling the stage moves road and
+   traffic together, so they can never come apart.
+   ============================================================ */
+/* Sits off to the right. The player panel owns the centre-bottom and the
+   shops own the left corner, so this is the strip of hillside that's
+   actually free to be looked at. */
+.road-layer {
+  position: absolute; left: 74%; bottom: 13%;
+  width: 640px; height: 300px;
+  transform: translateX(-50%) scale(var(--road-scale, 0.62));
+  transform-origin: 50% 100%;
+}
+/* Must be .road-art, not ".road-layer svg" — that would also catch the
+   little vehicle SVGs sitting inside this layer and blow them up to the
+   full size of the road. */
+.road-art { position: absolute; inset: 0; width: 640px; height: 300px; }
+
+.veh { position: absolute; top: 0; left: 0; offset-rotate: auto; will-change: offset-distance; }
+.veh-body { display: block; transform-origin: 50% 100%; }
+
+/* Both vehicles ride the identical path used to stroke the road. */
+.bus, .car { offset-path: path("M 604 16 C 545 30, 470 38, 396 46 C 330 53, 292 70, 302 90 C 312 110, 372 118, 440 126 C 500 133, 548 148, 548 172 C 548 196, 470 210, 392 220 C 320 229, 268 242, 272 268 C 276 292, 340 306, 410 318"); }
+
+.bus { animation: ride-down 58s linear infinite; }
+.bus .veh-body { animation: ride-scale 58s linear infinite; }
+
+/* The car climbs the other way, and on a different clock, so the two
+   never fall into a repeating pattern together. */
+.car { animation: ride-up 41s linear infinite; animation-delay: -12s; }
+.car .veh-body { animation: ride-scale-rev 41s linear infinite; animation-delay: -12s; }
+
+@keyframes ride-down    { from { offset-distance: 0%; }   to { offset-distance: 100%; } }
+@keyframes ride-up      { from { offset-distance: 100%; } to { offset-distance: 0%; } }
+@keyframes ride-scale     { from { transform: scale(0.34); } to { transform: scale(1.15); } }
+@keyframes ride-scale-rev { from { transform: scale(1.15); } to { transform: scale(0.34); } }
+
+.headlight {
+  position: absolute; left: 100%; top: 50%;
+  width: 46px; height: 20px; margin-top: -10px;
+  background: radial-gradient(ellipse at 0% 50%, rgba(240,185,106,0.42), rgba(240,185,106,0) 70%);
+  pointer-events: none;
+}
+
+/* ============================================================
+   THE ROADSIDE
+   Two shops at the bend — chai, and a board for bal mithai. This
+   is the one place in the scene allowed real detail, because a
+   signboard has to be readable to mean anything, and anything
+   small enough to sit on a far ridge would be a handful of pixels
+   on a phone. Everything else stays a silhouette.
+   ============================================================ */
+.roadside {
+  position: absolute; left: 0.5%; bottom: 2%;
+  width: 428px; max-width: 40vw;
+  pointer-events: none;
+}
+.roadside svg { display: block; width: 100%; height: auto; }
+
+.sign-hi {
+  font-family: 'Tiro Devanagari Hindi', serif;
+  font-size: 13px;
+  fill: var(--sign-paint);
+}
+.sign-en {
+  font-family: 'Instrument Sans', sans-serif;
+  font-size: 7px; letter-spacing: 0.13em;
+  fill: var(--sign-paint); fill-opacity: 0.82;
+}
+
+/* Kettle steam, drifting and thinning as it rises. */
+.steam { animation: steam 7s ease-in-out infinite; transform-origin: 50% 100%; }
+.steam-b { animation-delay: -3.1s; }
+@keyframes steam {
+  0%   { opacity: 0;    transform: translate(0, 4px) scale(0.7); }
+  30%  { opacity: 0.35; }
+  100% { opacity: 0;    transform: translate(-7px, -22px) scale(1.5); }
+}
 
 /* --- Fog -------------------------------------------------
    Three big blurred bands on deliberately mismatched timings
@@ -155,12 +257,12 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 /* Radial rather than linear so the bands fade out on every edge —
    a linear gradient leaves hard top and bottom lines. */
 .fog-1 {
-  bottom: 26%; height: 12vh;
+  bottom: 22%; height: 12vh;
   background: radial-gradient(ellipse 58% 100% at 44% 50%, rgba(200,214,220,0.34) 0%, rgba(224,232,236,0.14) 42%, transparent 72%);
   animation: fogdrift 75s ease-in-out infinite alternate;
 }
 .fog-2 {
-  bottom: 36%; height: 10vh; opacity: 0.34;
+  bottom: 29%; height: 10vh; opacity: 0.28;
   background: radial-gradient(ellipse 48% 100% at 62% 50%, rgba(186,204,214,0.30) 0%, transparent 70%);
   animation: fogdrift 110s ease-in-out infinite alternate-reverse;
 }
@@ -184,6 +286,28 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 .vignette {
   position: fixed; inset: 0; pointer-events: none;
   background: radial-gradient(ellipse at 50% 45%, transparent 40%, rgba(6,12,16,0.42) 78%, rgba(4,9,12,0.72) 100%);
+}
+
+/* ============================================================
+   THE OLD LOOK
+   Grain does more of this work than colour does. The noise is
+   baked once into a small tile and repeated — running a live
+   feTurbulence across the whole screen is expensive on phones,
+   and this looks the same for a fraction of the cost.
+   ============================================================ */
+.grain {
+  position: fixed; inset: 0; pointer-events: none; z-index: 1;
+  opacity: 0.13;
+  mix-blend-mode: overlay;
+  background-repeat: repeat;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+}
+
+/* A faint warm wash, like a print left in the sun. */
+.aged {
+  position: fixed; inset: 0; pointer-events: none; z-index: 1;
+  background: linear-gradient(to bottom, rgba(120, 86, 52, 0.10), rgba(88, 62, 40, 0.05) 55%, rgba(140, 96, 54, 0.13));
+  mix-blend-mode: soft-light;
 }
 
 /* ============================================================
@@ -485,11 +609,20 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
      horizontally and the summits turn into needles. Widening the SVG
      restores roughly the desktop proportions — and since the shape still
      repeats twice across the SVG's own width, the -50% loop is unaffected. */
-  .ridge svg { width: 480%; }
+  /* Named individually on purpose. Writing this as ".ridge svg" would have
+     the same specificity as the ".ridge-snow svg" rule above and, being
+     later in the file, would silently override it and stretch Nanda Devi
+     to 480% too. */
+  .ridge-far svg, .ridge-mid svg, .ridge-near svg { width: 480%; }
+  .road-layer { --road-scale: 0.4; left: 68%; bottom: 33%; }
+
+  /* The player fills the bottom of a phone, so the shops move up the
+     hillside to sit above it rather than behind it. */
+  .roadside { bottom: 27%; width: 250px; max-width: 64vw; left: 0; }
   /* Heights exceed the gaps between them so the layers overlap — leave a
      gap and the bright horizon shows through as a flat amber stripe. */
-  .ridge-snow { bottom: 24%; height: 24vh; }
-  .ridge-far  { bottom: 17%; height: 22vh; }
+  .ridge-snow { bottom: 24%; height: 30vh; }
+  .ridge-far  { bottom: 18%; height: 22vh; }
   .ridge-mid  { bottom:  8%; height: 20vh; }
   .ridge-near { bottom:  0;  height: 15vh; }
 
@@ -505,9 +638,15 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
    REDUCED MOTION — kill every moving part.
    ============================================================ */
 @media (prefers-reduced-motion: reduce) {
-  .ridge svg, .fog-1, .fog-2, .fog-3, .light {
+  .ridge svg, .fog-1, .fog-2, .fog-3, .light,
+  .bus, .car, .bus .veh-body, .car .veh-body, .steam {
     animation: none !important;
   }
+  /* Park the traffic somewhere sensible rather than stacked at the start. */
+  .bus { offset-distance: 34%; }
+  .car { offset-distance: 72%; }
+  .bus .veh-body { transform: scale(0.7); }
+  .car .veh-body { transform: scale(0.9); }
   .drawer { transition: none; }
   .intro { transition: none; }
   * { scroll-behavior: auto !important; }
@@ -529,31 +668,47 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
   <!-- Far snow peaks. Every mountain path uses C (Bézier) curves with
        uneven spacing — symmetric zigzags read as clip-art. -->
   <div class="ridge ridge-snow">
-    <svg viewBox="0 0 2000 320" preserveAspectRatio="none">
+    <!-- Nanda Devi. Two summits on one long ridge: the main peak (7816m)
+         and Nanda Devi East (7434m), joined by a saddle that never drops
+         below 6700m. Those real proportions are kept — East sits about
+         9% lower than the main summit, the saddle around 70% of its
+         height — so the outline is hers and not a generic mountain.
+         "meet" keeps her shape true at every screen width instead of
+         stretching her. -->
+    <svg viewBox="0 0 620 260" preserveAspectRatio="xMidYMax meet">
       <defs>
         <linearGradient id="gSnow" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%"   stop-color="#f0e4cf" stop-opacity="0.95" />
-          <stop offset="38%"  stop-color="#cfd8d8" stop-opacity="0.72" />
-          <stop offset="100%" stop-color="#12283a" stop-opacity="0.55" />
+          <stop offset="0%"   stop-color="#f4ead6" stop-opacity="0.98" />
+          <stop offset="26%"  stop-color="#dfe2da" stop-opacity="0.94" />
+          <stop offset="58%"  stop-color="#7e93a0" stop-opacity="0.90" />
+          <stop offset="100%" stop-color="#1b3040" stop-opacity="0.88" />
+        </linearGradient>
+        <linearGradient id="gFace" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"   stop-color="#fff6e6" stop-opacity="0.92" />
+          <stop offset="100%" stop-color="#f0e4cf" stop-opacity="0.08" />
         </linearGradient>
       </defs>
+
       <path fill="url(#gSnow)" d="
-        M 0 235
-        C 60 228, 100 205, 128 168 C 140 150, 146 120, 152 100
-        C 160 122, 172 152, 190 176 C 220 214, 250 200, 296 212
-        C 340 222, 372 196, 404 150 C 424 120, 438 88, 452 58
-        C 466 92, 480 128, 500 158 C 530 202, 560 186, 600 200
-        C 646 216, 680 206, 712 178 C 734 158, 748 132, 764 108
-        C 780 136, 796 168, 818 190 C 848 220, 890 226, 930 230
-        C 958 233, 980 234, 1000 235
-        C 1060 228, 1100 205, 1128 168 C 1140 150, 1146 120, 1152 100
-        C 1160 122, 1172 152, 1190 176 C 1220 214, 1250 200, 1296 212
-        C 1340 222, 1372 196, 1404 150 C 1424 120, 1438 88, 1452 58
-        C 1466 92, 1480 128, 1500 158 C 1530 202, 1560 186, 1600 200
-        C 1646 216, 1680 206, 1712 178 C 1734 158, 1748 132, 1764 108
-        C 1780 136, 1796 168, 1818 190 C 1848 220, 1890 226, 1930 230
-        C 1958 233, 1980 234, 2000 235
-        L 2000 320 L 0 320 Z" />
+        M 0 260
+        C 40 248, 80 228, 116 206 C 142 190, 164 168, 184 144
+        C 194 130, 202 116, 210 96
+        C 218 114, 226 130, 236 144 C 250 164, 262 170, 276 158
+        C 290 146, 300 116, 308 82 C 314 56, 318 34, 322 18
+        C 328 42, 332 62, 340 82 C 352 114, 364 102, 378 92
+        C 392 84, 404 90, 416 88
+        C 434 90, 448 76, 462 60 C 470 50, 478 44, 486 38
+        C 498 58, 510 84, 524 110 C 546 150, 570 190, 596 216
+        C 606 230, 614 246, 620 260
+        Z" />
+
+      <!-- The west faces, still catching light after the valley has gone dark. -->
+      <path fill="url(#gFace)" opacity="0.78" d="
+        M 322 18 C 318 34, 314 56, 308 82 C 300 116, 290 146, 276 158
+        C 286 138, 296 108, 304 76 C 310 50, 316 32, 322 18 Z" />
+      <path fill="url(#gFace)" opacity="0.62" d="
+        M 486 38 C 478 44, 470 50, 462 60 C 448 76, 434 90, 416 88
+        C 434 80, 448 66, 462 52 C 470 44, 478 40, 486 38 Z" />
     </svg>
   </div>
 
@@ -606,32 +761,60 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 
   <!-- The road: an S-curve receding toward the ridge, with a warm
        edge catching the last of the light. -->
+  <!-- Hairpins down the hillside. The stroke widens as the road comes
+       forward, which is what makes it recede. -->
   <div class="road-layer">
-    <svg viewBox="0 0 1000 200" preserveAspectRatio="xMidYMax meet">
+    <svg class="road-art" viewBox="0 0 640 300" preserveAspectRatio="none" aria-hidden="true">
       <defs>
-        <linearGradient id="gRoad" x1="0" y1="1" x2="0" y2="0">
-          <stop offset="0%"   stop-color="#1c242a" stop-opacity="0.92" />
-          <stop offset="60%"  stop-color="#243038" stop-opacity="0.72" />
-          <stop offset="100%" stop-color="#3d4b4d" stop-opacity="0.28" />
+        <linearGradient id="gRoadEdge" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"   stop-color="#e8b078" stop-opacity="0.34" />
+          <stop offset="100%" stop-color="#e8b078" stop-opacity="0.92" />
+        </linearGradient>
+        <linearGradient id="gTar" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"   stop-color="#2e3942" stop-opacity="0.75" />
+          <stop offset="100%" stop-color="#0f171d" stop-opacity="1" />
         </linearGradient>
       </defs>
-      <path fill="url(#gRoad)" d="
-        M 322 200
-        C 392 158, 428 132, 452 104
-        C 472 80, 462 54, 486 26
-        C 496 14, 502 8, 505 2
-        L 527 2
-        C 522 10, 515 20, 509 34
-        C 493 64, 510 88, 530 112
-        C 558 142, 606 174, 664 200 Z" />
-      <!-- The last of the light catching both edges of the tarmac. -->
-      <path fill="none" stroke="var(--sky-glow-soft)" stroke-opacity="0.55" stroke-width="2.2" stroke-linecap="round" d="
-        M 322 200 C 392 158, 428 132, 452 104
-        C 472 80, 462 54, 486 26 C 496 14, 502 8, 505 2" />
-      <path fill="none" stroke="var(--sky-glow)" stroke-opacity="0.34" stroke-width="1.6" stroke-linecap="round" d="
-        M 660 200 C 604 172, 556 140, 528 110
-        C 508 86, 492 62, 508 32 C 514 18, 520 10, 524 2" />
+
+      <!-- Warm edge light first, then the tarmac laid narrower on top,
+           so a rim of dusk shows along both sides. -->
+      <path fill="none" stroke="url(#gRoadEdge)" stroke-linecap="round" stroke-width="9.5" d="
+        M 604 16 C 545 30, 470 38, 396 46 C 330 53, 292 70, 302 90
+        C 312 110, 372 118, 440 126 C 500 133, 548 148, 548 172
+        C 548 196, 470 210, 392 220 C 320 229, 268 242, 272 268
+        C 276 292, 340 306, 410 318" />
+      <path fill="none" stroke="url(#gTar)" stroke-linecap="round" stroke-width="6.5" d="
+        M 604 16 C 545 30, 470 38, 396 46 C 330 53, 292 70, 302 90
+        C 312 110, 372 118, 440 126 C 500 133, 548 148, 548 172
+        C 548 196, 470 210, 392 220 C 320 229, 268 242, 272 268
+        C 276 292, 340 306, 410 318" />
     </svg>
+
+    <!-- A bus coming down and a car going up, on unequal clocks. -->
+    <div class="veh bus">
+      <div class="headlight"></div>
+      <svg class="veh-body" width="26" height="12" viewBox="0 0 26 12" aria-hidden="true">
+        <rect x="0.5" y="2" width="25" height="8" rx="2.2" fill="var(--retro-bus)"/>
+        <rect x="0.5" y="5.6" width="25" height="1.5" fill="var(--retro-bus-trim)"/>
+        <rect x="0.5" y="1.4" width="25" height="1.4" rx="0.7" fill="var(--retro-roof)"/>
+        <rect x="3" y="3.1" width="3" height="2.2" fill="var(--window-lit)" opacity="0.85"/>
+        <rect x="7.5" y="3.1" width="3" height="2.2" fill="var(--window-lit)" opacity="0.7"/>
+        <rect x="12" y="3.1" width="3" height="2.2" fill="var(--window-lit)" opacity="0.8"/>
+        <rect x="16.5" y="3.1" width="3" height="2.2" fill="var(--window-lit)" opacity="0.65"/>
+        <circle cx="5" cy="10.2" r="1.5" fill="#0b1216"/>
+        <circle cx="20" cy="10.2" r="1.5" fill="#0b1216"/>
+      </svg>
+    </div>
+
+    <div class="veh car">
+      <div class="headlight"></div>
+      <svg class="veh-body" width="16" height="9" viewBox="0 0 16 9" aria-hidden="true">
+        <path d="M1 6.5 C1 4.6 3 4.4 4.6 4.3 C6 2.6 10 2.6 11.4 4.3 C13 4.5 15 4.7 15 6.5 Z" fill="var(--dust)"/>
+        <path d="M5.4 4.3 C6.4 3.2 9.4 3.2 10.4 4.3 Z" fill="var(--window-lit)" opacity="0.5"/>
+        <circle cx="4.4" cy="7" r="1.3" fill="#0b1216"/>
+        <circle cx="11.6" cy="7" r="1.3" fill="#0b1216"/>
+      </svg>
+    </div>
   </div>
 
   <!-- Foreground pines + a few village lights down in the valley. -->
@@ -681,7 +864,97 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
   </div>
 </div>
 
+<!-- The two shops at the bend. -->
+<div class="roadside" aria-hidden="true">
+  <svg viewBox="0 0 400 200" preserveAspectRatio="xMinYMax meet">
+    <defs>
+      <linearGradient id="gLamp" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#f0b96a" stop-opacity="0.34"/>
+        <stop offset="100%" stop-color="#f0b96a" stop-opacity="0"/>
+      </linearGradient>
+    </defs>
+
+    <defs>
+      <linearGradient id="gGround" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%"  stop-color="var(--pine-near)"/>
+        <stop offset="82%" stop-color="var(--pine-near)"/>
+        <stop offset="100%" stop-color="var(--pine-near)" stop-opacity="0"/>
+      </linearGradient>
+    </defs>
+    <!-- the bit of ground they stand on, fading off to the right so it
+         melts into the hillside instead of ending in a cliff edge -->
+    <path fill="url(#gGround)" d="M 0 176 C 60 168, 130 164, 200 166 C 270 168, 340 174, 400 178 L 400 200 L 0 200 Z"/>
+
+    <!-- ---------- CHAI SHOP ---------- -->
+    <g>
+      <rect x="36" y="120" width="74" height="50" fill="#141d22"/>
+      <!-- rusted tin roof, overhanging -->
+      <path d="M 28 122 L 118 122 L 112 110 L 34 110 Z" fill="var(--retro-roof)"/>
+      <path d="M 28 122 L 118 122 L 118 125 L 28 125 Z" fill="#4c4033"/>
+      <!-- lit doorway and window -->
+      <rect x="46" y="132" width="20" height="38" fill="var(--window-lit)" opacity="0.62"/>
+      <rect x="76" y="134" width="24" height="18" fill="var(--window-lit)" opacity="0.48"/>
+      <!-- counter with a kettle on it -->
+      <rect x="72" y="152" width="32" height="4" fill="#2b2119"/>
+      <path d="M 84 152 L 84 146 L 92 146 L 92 152 Z" fill="#3d3128"/>
+      <path d="M 92 148 C 96 148, 96 151, 93 151" fill="none" stroke="#3d3128" stroke-width="1.2"/>
+      <g class="steam"><ellipse cx="88" cy="144" rx="3" ry="4.5" fill="#dfe6e8" opacity="0.5"/></g>
+      <g class="steam steam-b"><ellipse cx="90" cy="144" rx="2.4" ry="3.6" fill="#dfe6e8" opacity="0.4"/></g>
+      <!-- चाय board -->
+      <rect x="38" y="112" width="40" height="9" rx="1" fill="var(--sign-board)"/>
+      <text class="sign-hi" x="58" y="120" text-anchor="middle" style="font-size:8px">चाय</text>
+      <!-- a bulb over the door -->
+      <circle cx="58" cy="128" r="1.6" fill="#ffd9a0"/>
+      <path d="M 44 128 L 72 128 L 78 170 L 38 170 Z" fill="url(#gLamp)"/>
+    </g>
+
+    <!-- ---------- BAL MITHAI SHOP ---------- -->
+    <g>
+      <rect x="150" y="112" width="96" height="58" fill="#161f24"/>
+      <path d="M 142 114 L 254 114 L 248 100 L 148 100 Z" fill="var(--retro-roof)"/>
+      <path d="M 142 114 L 254 114 L 254 117 L 142 117 Z" fill="#4c4033"/>
+      <!-- the painted board, the reason this cluster is in the foreground -->
+      <rect x="146" y="76" width="104" height="26" rx="2" fill="var(--sign-board)"/>
+      <rect x="149" y="79" width="98" height="20" rx="1" fill="none" stroke="var(--sign-paint)" stroke-opacity="0.35"/>
+      <text class="sign-hi" x="198" y="90" text-anchor="middle">बाल मिठाई</text>
+      <text class="sign-en" x="198" y="98" text-anchor="middle">BAL MITHAI</text>
+      <!-- shopfront: lit case with trays of sweets -->
+      <rect x="158" y="124" width="80" height="26" fill="var(--window-lit)" opacity="0.5"/>
+      <rect x="162" y="130" width="22" height="6" rx="1" fill="#5b3a1e" opacity="0.85"/>
+      <rect x="190" y="130" width="22" height="6" rx="1" fill="#6b4526" opacity="0.85"/>
+      <rect x="162" y="140" width="22" height="6" rx="1" fill="#6b4526" opacity="0.8"/>
+      <rect x="190" y="140" width="22" height="6" rx="1" fill="#5b3a1e" opacity="0.8"/>
+      <rect x="158" y="150" width="80" height="4" fill="#2b2119"/>
+      <rect x="216" y="128" width="18" height="42" fill="var(--window-lit)" opacity="0.34"/>
+    </g>
+
+    <!-- ---------- PARKED JEEP ---------- -->
+    <g transform="translate(274,146)">
+      <path d="M2 16 L2 7 L9 7 L13 2 L30 2 L34 7 L42 7 L42 16 Z" fill="var(--retro-bus)" opacity="0.88"/>
+      <path d="M14 7 L29 7 L26 3 L17 3 Z" fill="var(--window-lit)" opacity="0.4"/>
+      <rect x="2" y="10" width="40" height="2" fill="var(--retro-bus-trim)" opacity="0.75"/>
+      <circle cx="11" cy="17" r="3.4" fill="#0b1216"/>
+      <circle cx="33" cy="17" r="3.4" fill="#0b1216"/>
+    </g>
+
+    <!-- ---------- MILESTONE ---------- -->
+    <g transform="translate(126,158)">
+      <path d="M0 12 L0 4 C0 1.6 1.6 0 4 0 L8 0 C10.4 0 12 1.6 12 4 L12 12 Z" fill="#cfc6b2" opacity="0.72"/>
+      <path d="M0 4 C0 1.6 1.6 0 4 0 L8 0 C10.4 0 12 1.6 12 4 Z" fill="var(--retro-bus-trim)" opacity="0.72"/>
+    </g>
+
+    <!-- ---------- DEODAR ---------- -->
+    <g fill="var(--pine-near)">
+      <path d="M 340 172 C 346 148, 349 126, 353 104 C 357 126, 360 148, 366 172 Z"/>
+      <path d="M 372 174 C 377 156, 379 138, 382 120 C 385 138, 387 156, 392 174 Z"/>
+      <path d="M 8 174 C 14 150, 17 130, 21 110 C 25 130, 28 150, 34 174 Z"/>
+    </g>
+  </svg>
+</div>
+
 <div class="vignette" aria-hidden="true"></div>
+<div class="aged" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
 
 <!-- ============================================================
      PAGE
@@ -801,10 +1074,24 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
    player skips it automatically, but you can delete the line.
    ================================================================ */
 const PLAYLIST = [
+  // --- The old Kumaoni voices ---
+  // Gopal Babu Goswami, Heera Singh Rana, and Mohan & Naima Khan Upreti
+  // between them are most of what Kumaoni folk music sounds like.
+  { id: 'hWIQij3iYKw', title: 'Kaile Baje Muruli',     artist: 'Gopal Babu Goswami',        region: 'kumaoni'  },
+  { id: '2PJmfS7c51A', title: 'Ghughuti Na Basa',      artist: 'Gopal Babu Goswami',        region: 'kumaoni'  },
+  { id: '_T16N4Py_D0', title: 'Haye Teri Rumala',      artist: 'Gopal Babu Goswami',        region: 'kumaoni'  },
+  { id: 'AOIm8gwDpvs', title: 'Bati Ke Barat',         artist: 'Gopal Babu Goswami',        region: 'kumaoni'  },
+  { id: 'hfn79NvWJfk', title: 'Rangili Bindi',         artist: 'Heera Singh Rana',          region: 'kumaoni'  },
+  { id: 'ARYUXVmZ5fc', title: 'Mijaata',               artist: 'Heera Singh Rana',          region: 'kumaoni'  },
+  { id: 'byr2CeR3v28', title: 'Lali Ho Lali Hosiyala', artist: 'Mohan Upreti & Naima Khan Upreti', region: 'kumaoni' },
+  { id: 'OI1t3gIbKzo', title: 'Para Bhida',            artist: 'Mohan Upreti & Naima Khan Upreti', region: 'kumaoni' },
+  { id: '5c_KD87twT0', title: 'Kumaoni Folk Song',     artist: 'Naima Khan Upreti & Mohan Upreti', region: 'folk' },
+  { id: '2-GipLvy9pg', title: 'Jhoda Chanchari',       artist: 'Traditional',               region: 'folk'     },
+  { id: 'Cbfr3aF8fxg', title: 'Nyoli',                 artist: 'Deepa Arya',                region: 'folk'     },
+
   // --- Traditional & classics ---
   { id: '4FYT0TIZfnI', title: 'Bedu Pako Baro Masa',   artist: 'Mahima Thakur',             region: 'kumaoni'  },
   { id: 'qhJ2htuDjlg', title: 'Chaita Ki Chaitwali',   artist: 'Amit Saagar',               region: 'garhwali' },
-  { id: 'CTSrsQ7WIms', title: 'Ghughuti Na Basa',      artist: 'Traditional',               region: 'kumaoni'  },
   { id: 'SWcwtQGHYLg', title: 'Jhumelo',               artist: 'Madhuri Barthwal',          region: 'garhwali' },
   { id: 'd31rTvI83_0', title: 'Jhumelo (Folk Dance)',  artist: 'Mahila Navjagran Samiti',   region: 'folk'     },
   { id: 'D7E-3p6E5y8', title: 'Ni Basa Ghughuti Aam Ki', artist: 'Balveer Rana',            region: 'kumaoni'  },

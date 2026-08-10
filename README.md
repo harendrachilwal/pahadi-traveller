@@ -71,14 +71,24 @@ colour on the page is defined once in that block, so changing `--sky-glow`
 changes the horizon everywhere it appears. Nothing below that block hardcodes
 a colour.
 
-**The mountains.** Search for `SCENE`. There are four ridge layers — snow
-peaks furthest away, then two hill ridges, then the dark pines closest to
-you. Each is an SVG shape drawn twice side by side, which is what lets it
-slide sideways forever without a visible seam.
+**The mountains.** Search for `SCENE`. The big snow mountain is **Nanda
+Devi** — her real two-summit profile, the main peak and Nanda Devi East
+joined by a high ridge. Unlike everything else she doesn't move: repeat her
+to loop the animation and you'd see two of her, and a mountain that far away
+barely shifts as you drive anyway. The three nearer ridges are each drawn
+twice side by side, which is what lets them slide sideways forever without a
+visible seam.
 
-If you change a ridge's shape, keep the two halves identical or the loop will
-jump. And keep the curves — the `C` letters in the shape data are what make
-the peaks look like real mountains rather than a cartoon zigzag.
+If you change a moving ridge's shape, keep its two halves identical or the
+loop will jump. And keep the curves — the `C` letters in the shape data are
+what make the peaks look like real mountains rather than a cartoon zigzag.
+
+**The road and the shops.** Search for `SNAKE ROAD` for the hairpin road —
+the same path data draws the road and steers the little bus and car along
+it, so if you reshape the road the traffic follows automatically. Search for
+`ROADSIDE` for the chai shop and the बाल मिठाई (Bal Mithai) shop; the text on
+the signboards is ordinary SVG `<text>`, so renaming a shop is just editing
+the words.
 
 **How fast things move.** Search for `drift`. Each ridge has its own duration
 (30s, 24s, 18s, 14s). Nearer ridges move faster, which is what sells the
