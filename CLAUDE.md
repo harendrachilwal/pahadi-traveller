@@ -1,4 +1,4 @@
-# CLAUDE.md — Pahadi Drive (पहाड़ी ड्राइव)
+# CLAUDE.md — Pahadi Safar (पहाड़ी सफ़र) — formerly Pahadi Drive
 
 This file gives you full context for this project. Read it before making any changes.
 
