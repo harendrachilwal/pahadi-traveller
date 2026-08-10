@@ -129,9 +129,9 @@ feeling of driving forward. Bigger number = slower.
 
 ## Things worth knowing
 
-**Why the "Begin the drive" screen exists.** Browsers refuse to play sound
-until someone clicks something. That button is the click. Remove it and the
-site loads silent on phones with no way to start.
+**Why nothing plays until you press play.** Browsers refuse to let any page
+make sound until the visitor taps something. The play button is that tap.
+That's a browser rule, not a setting — no website can start music on its own.
 
 **Why YouTube.** Pahadi music is licensed and lives on YouTube. Playing it
 through YouTube's official player means plays still count for the artists.

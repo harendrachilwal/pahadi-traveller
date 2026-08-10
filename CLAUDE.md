@@ -188,7 +188,15 @@ YouTube error codes `2, 5, 100, 101, 150` mean the video is removed, private, or
 
 ### Autoplay policy
 
-Browsers block audio until the user interacts. That's what the intro overlay ("Begin the drive" button) is for — the click satisfies the gesture requirement and triggers the first `playVideo()`. Don't remove the intro; without it, mobile is silent on load.
+Browsers block audio until the user interacts. **The intro overlay was removed
+at the owner's direction (Aug 2026)** — the site now lands straight on the
+player, and the play button itself is the required gesture. Nothing is lost:
+audio could never have started before a tap anyway, and this is one tap fewer.
+
+Because play is now the *first* thing a visitor touches, it may be pressed
+before the IFrame API has loaded. `togglePlay()` records that press in
+`wantsPlay` and `onPlayerReady()` honours it, so an early tap still starts the
+music instead of doing nothing. Keep that behaviour if you touch the player.
 
 ---
 

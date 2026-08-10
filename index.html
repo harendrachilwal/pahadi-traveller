@@ -325,8 +325,13 @@ body.has-photos .roadside { display: none; }
   background: linear-gradient(to bottom, rgba(60,46,26,0.10), transparent 30%, transparent 55%, rgba(52,40,22,0.30));
 }
 body.has-photos .wordmark-hi { text-shadow: 0 1px 14px rgba(250,244,226,0.85), 0 0 2px rgba(250,244,226,0.9); }
+/* Photos are busier than the drawn scene, so the smaller lines need a
+   fuller halo to stay readable over trees and rock. */
 body.has-photos .wordmark-en,
-body.has-photos .tagline { text-shadow: 0 1px 8px rgba(250,244,226,0.9); }
+body.has-photos .tagline {
+  color: var(--ink);
+  text-shadow: 0 0 10px rgba(250,244,226,0.98), 0 0 4px rgba(250,244,226,1), 0 1px 2px rgba(250,244,226,1);
+}
 
 /* Sepia edge-darkening — an old print, not a night sky. */
 .vignette {
@@ -642,37 +647,6 @@ body.has-photos .tagline { text-shadow: 0 1px 8px rgba(250,244,226,0.9); }
 .track.current .track-name { color: var(--amber); }
 .track.current .track-num  { color: var(--amber); }
 
-/* ============================================================
-   INTRO OVERLAY
-   Browsers block audio until the user interacts. This click is
-   what unlocks it — without the overlay, mobile loads silent.
-   ============================================================ */
-.intro {
-  position: fixed; inset: 0; z-index: 10;
-  display: grid; place-items: center;
-  background: var(--sky-deep);
-  transition: opacity 0.9s ease, visibility 0.9s;
-}
-.intro.gone { opacity: 0; visibility: hidden; pointer-events: none; }
-.intro-inner { text-align: center; padding: 2rem; }
-.intro-hi {
-  font-family: 'Tiro Devanagari Hindi', serif;
-  font-size: clamp(2rem, 8vw, 3.4rem);
-  color: var(--ink-red);
-}
-.intro-sub {
-  font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 300;
-  color: var(--ivory-faint); margin-top: 0.9rem; font-size: 0.95rem;
-}
-.begin {
-  margin-top: 2.4rem;
-  padding: 0.8rem 2rem; border-radius: 999px;
-  border: 1px solid var(--border-strong);
-  color: var(--ivory);
-  font-size: 0.82rem; letter-spacing: 0.16em; text-transform: uppercase;
-  transition: background 0.25s, border-color 0.25s, transform 0.2s;
-}
-.begin:hover { background: rgba(234,223,203,0.07); border-color: var(--amber); transform: translateY(-2px); }
 
 /* The YouTube iframe lives off-screen. NOT display:none — some
    browsers refuse to play audio from a fully hidden iframe. */
@@ -733,7 +707,6 @@ body.has-photos .tagline { text-shadow: 0 1px 8px rgba(250,244,226,0.9); }
   .bus .veh-body { transform: scale(0.7); }
   .car .veh-body { transform: scale(0.9); }
   .drawer { transition: none; }
-  .intro { transition: none; }
   * { scroll-behavior: auto !important; }
 }
 </style>
@@ -1138,17 +1111,6 @@ body.has-photos .tagline { text-shadow: 0 1px 8px rgba(250,244,226,0.9); }
   <div class="tracklist" id="tracklist"></div>
 </aside>
 
-<!-- ============================================================
-     INTRO
-     ============================================================ -->
-<div class="intro" id="intro">
-  <div class="intro-inner">
-    <p class="intro-hi">पहाड़ी सफ़र</p>
-    <p class="intro-sub">Roll the window down.</p>
-    <button class="begin" id="begin">Begin the drive</button>
-  </div>
-</div>
-
 <div id="yt-player"></div>
 <p class="sr-only" id="live-region" role="status" aria-live="polite"></p>
 
@@ -1215,6 +1177,44 @@ const PLAYLIST = [
   { id: 'rL9LnS9Mvzw', title: 'Hit Rupa',              artist: 'Pappu Karki',               region: 'kumaoni'  },
   { id: 'pUfSASuTdVI', title: 'Eja Re',                artist: 'Pappu Karki',               region: 'kumaoni'  },
   { id: '47LQmhaOdtA', title: 'Sun Le Dagadiya',       artist: 'Pappu Karki',               region: 'kumaoni'  },
+
+  // --- Old Garhwali Songs ---
+  // Imported from the owner's YouTube playlist "Old Garhwali Songs".
+  // Where a video title didn't name the singer, the artist shown is the
+  // label that published the recording - edit any you know.
+  { id: 'om0QOM3wudk', title: 'Nagani Bazar', artist: 'T-Series Regional', region: 'garhwali' },
+  { id: 'vWKj_i_oG1k', title: 'Abhi Bunai 100 Ku Note', artist: 'Narendra Singh Negi', region: 'garhwali' },
+  { id: 'CofL05QgSN8', title: 'Tihri Duban Lagu Cha', artist: 'Narendra Singh Negi', region: 'garhwali' },
+  { id: 'Rtd2VJbcq0U', title: 'Ghagri Ka Ghera Byoli Bou', artist: 'Narendra Singh Negi', region: 'garhwali' },
+  { id: 'tu1XHyxGWYc', title: 'Chandi Batna Bhaiji', artist: 'Rama Cassettes', region: 'garhwali' },
+  { id: 'r5iafoc3rvY', title: 'Ikh Ma Chui Ukh Ma Chui', artist: 'Narendra Singh Negi', region: 'garhwali' },
+  { id: 'g9RqwFdJ3x4', title: 'Khudeni Na Rayee', artist: 'Vinod Sirola', region: 'garhwali' },
+  { id: 'UXfnXCl7niw', title: 'Bedo Pako Baramasa', artist: 'Shailender Juyal & Meena Rana', region: 'garhwali' },
+  { id: 'HIvbFgv0qsA', title: 'Ghughuti', artist: 'Kishan Mahipal', region: 'garhwali' },
+  { id: 'U56JwlnvWzw', title: 'Ke Mana Boleya Bhaiju', artist: 'Narendra Singh Negi', region: 'garhwali' },
+  { id: 'Ot5u6f4B96E', title: 'Oye Lachhi Ghaur', artist: 'T-Series Regional', region: 'garhwali' },
+  { id: 'TphLYH_XIL0', title: 'Palya Gaon Ki Surja', artist: 'Rama Cassettes', region: 'garhwali' },
+  { id: 'SuU5sgxOqPQ', title: 'Shyali Gayo Launu Aeja', artist: 'T-Series Regional', region: 'garhwali' },
+  { id: 'AzmlLZlzbLc', title: 'Yo Macho Ka Bana', artist: 'Rama Cassettes', region: 'garhwali' },
+  { id: 'fKT6IWq8xHo', title: 'Ja Baduli Sua', artist: 'Rama Cassettes', region: 'garhwali' },
+  { id: 'ZQYDqZjUmhI', title: 'Ghar Bati Chitthi Aegyayee', artist: 'T-Series Regional', region: 'garhwali' },
+  { id: 'Tbiwomst7ug', title: 'Ke Ka Manai Ki Ke Ne Ni', artist: 'Narendra Singh Negi', region: 'garhwali' },
+  { id: 'hj3oHEkQAog', title: 'Tyara Roop Ki Jhol Ma', artist: 'Narendra Singh Negi', region: 'garhwali' },
+  { id: 'X71lc5KXsFM', title: 'Danda Dharu Ma Dham', artist: 'Narendra Singh Negi', region: 'garhwali' },
+  { id: 'hsY70MX8kVY', title: 'Maalu Gwiraalu Ka Bich', artist: 'T-Series Regional', region: 'garhwali' },
+  { id: 'ygPrS2fmvbk', title: 'Geet Lana Taandi Bal', artist: 'Narendra Singh Negi & Anuradha Paudwal', region: 'garhwali' },
+  { id: '8Hit97VQYj4', title: 'Tibari Ma Baithi Holi', artist: 'Rama Cassettes', region: 'garhwali' },
+  { id: '3uppau18EUQ', title: 'Mela Kholo Ma', artist: 'Narendra Singh Negi', region: 'garhwali' },
+  { id: '2QbV4BrMinQ', title: 'Otuwa Belenaa', artist: 'T-Series Regional', region: 'garhwali' },
+  { id: 'm8ph6TGZPi0', title: 'Tonsa Boo', artist: 'T-Series Regional', region: 'garhwali' },
+  { id: 'Vtrp3s-fXuo', title: 'Teelu Bakhri', artist: 'T-Series Regional', region: 'garhwali' },
+  { id: 'bOlLPbQhJeo', title: 'Ranikheta Ramdhola', artist: 'Kishan Mahipal', region: 'garhwali' },
+  { id: 'E1oIK6mnW9Q', title: 'Himala Haaun Kauta', artist: 'Narendra Singh Negi & Anuradha Nirala', region: 'garhwali' },
+  { id: 'hMBxVjYnXsw', title: 'Teri Aankhyun Ka Sawal', artist: 'Narendra Singh Negi & Meena Rana', region: 'garhwali' },
+  { id: '4FHsy-aGnZw', title: 'Le Pothuli Ko Maas', artist: 'T-Series Regional', region: 'garhwali' },
+  { id: 'PncCjJkV0ls', title: 'Ghut Ghut Baduli Lagi Ch', artist: 'T-Series Regional', region: 'garhwali' },
+  { id: 'lMKkovyjVgM', title: 'Ghas Kati Ghasilo', artist: 'Rama Cassettes', region: 'garhwali' },
+  { id: 'Ur_hqivMqvQ', title: 'Selku Melu', artist: 'Pratham Singh Chauhan & Manju Nautiyal', region: 'garhwali' },
 ];
 
 /* ================================================================
@@ -1228,6 +1228,7 @@ let shuffle = false;
 let drawerOpen = false;
 let dragging = false;       // true while the user drags the progress bar
 let errorStreak = 0;        // guards against looping through a dead playlist
+let wantsPlay = false;      // play was pressed before the API had loaded
 let ticker = null;          // interval that updates the progress bar
 
 /* ---------- small helpers ---------- */
@@ -1463,6 +1464,8 @@ window.onYouTubeIframeAPIReady = function () {
 function onPlayerReady() {
   playerReady = true;
   updateNowPlaying();
+  // Someone already pressed play while we were still loading.
+  if (wantsPlay) { wantsPlay = false; player.playVideo(); }
 }
 
 function onPlayerStateChange(e) {
@@ -1539,8 +1542,16 @@ function prev() {
   playTrack(current - 1);
 }
 
+/* The play button is the first thing anyone touches — there's no intro
+   screen any more — so it may well be pressed before YouTube's API has
+   finished loading. Remember the press and honour it the moment the
+   player is ready, instead of silently doing nothing. */
 function togglePlay() {
-  if (!playerReady) return;
+  if (!playerReady) {
+    wantsPlay = !wantsPlay;
+    setPlayIcon(wantsPlay);
+    return;
+  }
   if (isPlaying) player.pauseVideo();
   else player.playVideo();
 }
@@ -1639,24 +1650,6 @@ document.addEventListener('keydown', (e) => {
   else if (e.key === 'ArrowRight') { next(); }
   else if (k === 'p')          { setDrawer(!drawerOpen); }
   else if (e.key === 'Escape') { setDrawer(false); }
-});
-
-/* ================================================================
-   INTRO
-
-   Browsers won't let a page make noise until someone interacts with
-   it. This button is that interaction — it's why the overlay exists.
-   ================================================================ */
-$('begin').addEventListener('click', () => {
-  $('intro').classList.add('gone');
-  if (playerReady) {
-    player.playVideo();
-  } else {
-    // API still loading — start as soon as it's ready.
-    const waitForPlayer = setInterval(() => {
-      if (playerReady) { clearInterval(waitForPlayer); player.playVideo(); }
-    }, 120);
-  }
 });
 
 /* ---------- go ---------- */
