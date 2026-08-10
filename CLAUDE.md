@@ -43,9 +43,17 @@ That's it. Don't create `src/`, `components/`, `styles/`, or `assets/` directori
 
 ## Design direction
 
-**Mood:** Dusk in the high Himalaya. The moment the sun drops behind the ridge and the sky bleeds amber into deep teal. Peaceful, slightly melancholic, free.
+**Mood (updated Aug 2026, owner's direction):** a vintage Indian travel
+poster — "Discover Uttarakhand" lithograph style. Aged cream paper, litho
+green hills, white peaks with blue shadow, navy and terracotta ink, film
+grain, a paper-margin frame. The owner supplied a reference poster image and
+chose this over the original dusk direction; note that this deliberately
+overrides the earlier rule against "warm cream backgrounds with terracotta
+accents". The original dusk palette survives in git history (commit
+`acec8e5` and earlier) if the site ever returns to night.
 
-**Deliberately NOT:** sunny postcard blues, purple "vaporwave sunset" gradients, warm cream backgrounds with terracotta accents, or neon-on-black. Those are generic defaults. The palette below is modeled on a real Chopta/Munsiyari dusk.
+**Original mood (superseded):** dusk in the high Himalaya, amber into deep
+teal, modeled on a Chopta/Munsiyari dusk.
 
 ### Color tokens
 

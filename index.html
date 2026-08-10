@@ -6,7 +6,7 @@
 
 <title>Pahadi Drive — पहाड़ी ड्राइव</title>
 <meta name="description" content="A drive through the hills of Uttarakhand, with Garhwali and Kumaoni music. Open it when you miss home." />
-<meta name="theme-color" content="#0a1620" />
+<meta name="theme-color" content="#e9dcbc" />
 
 <meta property="og:type" content="website" />
 <meta property="og:title" content="Pahadi Drive — पहाड़ी ड्राइव" />
@@ -28,24 +28,33 @@
    not further down — everything else refers back to these.
    ============================================================ */
 :root {
-  --sky-deep:       #0a1620;
-  --sky-mid:        #12283a;
-  --sky-warm:       #3d4b4d;
-  --sky-glow:       #d68b52;
-  --sky-glow-soft:  #e8b078;
-  --horizon:        #4a3a2a;
-  --snow:           #f0e4cf;
-  --pine-far:       #253944;
-  --pine-mid:       #17262f;
-  --pine-near:      #0a1418;
-  --ivory:          #eadfcb;
-  --ivory-dim:      rgba(234, 223, 203, 0.68);
-  --ivory-faint:    rgba(234, 223, 203, 0.38);
-  --amber:          #e6a566;
-  --glass:          rgba(10, 18, 24, 0.42);
-  --glass-strong:   rgba(10, 18, 24, 0.62);
-  --border:         rgba(234, 223, 203, 0.13);
-  --border-strong:  rgba(234, 223, 203, 0.22);
+  /* Vintage travel-poster palette — aged cream paper, litho greens,
+     navy and terracotta ink. Modeled on old "Incredible India" style
+     tourism posters (owner's reference image, Aug 2026). The original
+     dusk palette lives in git history if the site ever goes back. */
+  --sky-deep:       #e9dcbc;   /* top of sky, aged paper */
+  --sky-mid:        #e6d7b2;
+  --sky-warm:       #e2d0a6;
+  --sky-glow:       #d9be8b;   /* horizon warmth */
+  --sky-glow-soft:  #e7d7ae;
+  --horizon:        #ccb488;
+  --snow:           #f8f3e4;   /* sunlit snow */
+  --pine-far:       #93ab89;   /* sage, hazy with distance */
+  --pine-mid:       #5e7f5c;
+  --pine-near:      #2c473a;   /* deep foreground green */
+  --ink:            #22414f;   /* navy ink, all body text */
+  --ink-red:        #ad3f28;   /* terracotta headline red */
+  --paper:          #ecdfc3;
+  /* "ivory" is the site-wide text colour; on the cream poster it IS the
+     navy ink. Redefining it here recolours every label at once. */
+  --ivory:          #22414f;
+  --ivory-dim:      rgba(34, 65, 79, 0.70);
+  --ivory-faint:    rgba(34, 65, 79, 0.44);
+  --amber:          #b5432c;   /* active/current highlight, now poster red */
+  --glass:          rgba(243, 234, 210, 0.55);
+  --glass-strong:   rgba(242, 232, 206, 0.92);
+  --border:         rgba(34, 65, 79, 0.22);
+  --border-strong:  rgba(34, 65, 79, 0.40);
 
   /* --- Retro extension -------------------------------------
      The palette above is all silhouette and sky. These few are
@@ -53,12 +62,12 @@
      bus, a hand-painted signboard, a lit shop window. Nothing
      above was changed — this only adds.
      --------------------------------------------------------- */
-  --retro-bus:      #cdc0a4;   /* sun-bleached cream bodywork */
-  --retro-bus-trim: #a2503a;   /* faded red stripe */
+  --retro-bus:      #efe3c6;   /* cream bodywork, poster-bright */
+  --retro-bus-trim: #b0402a;   /* red band, like the hill buses */
   --retro-roof:     #6b5b47;   /* rusted tin */
   --sign-board:     #7c4a2a;   /* painted board */
   --sign-paint:     #f2e3c4;   /* the lettering on it */
-  --window-lit:     #f0b96a;   /* kerosene-ish interior light */
+  --window-lit:     #f0b96a;   /* warm shopfront light */
   --dust:           #8a7a63;
 }
 
@@ -111,9 +120,9 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
   height: 46vmax;
   transform: translateX(-50%);
   background: radial-gradient(ellipse at 50% 100%,
-      rgba(232, 176, 120, 0.50) 0%,
-      rgba(214, 139, 82, 0.24) 34%,
-      rgba(214, 139, 82, 0) 68%);
+      rgba(255, 250, 235, 0.55) 0%,
+      rgba(240, 224, 180, 0.28) 34%,
+      rgba(240, 224, 180, 0) 68%);
   pointer-events: none;
 }
 
@@ -203,7 +212,7 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 .headlight {
   position: absolute; left: 100%; top: 50%;
   width: 46px; height: 20px; margin-top: -10px;
-  background: radial-gradient(ellipse at 0% 50%, rgba(240,185,106,0.42), rgba(240,185,106,0) 70%);
+  background: radial-gradient(ellipse at 0% 50%, rgba(240,185,106,0.25), rgba(240,185,106,0) 70%);
   pointer-events: none;
 }
 
@@ -246,29 +255,31 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
    Three big blurred bands on deliberately mismatched timings
    (75s / 110s / 140s) so the loop never lines up visibly.
    --------------------------------------------------------- */
+/* On the old dusk palette these blended with 'screen'; that blend is
+   invisible on a light paper sky, so the clouds are now plain soft
+   white laid over the hills. */
 .fog {
   position: absolute;
   left: -30%;
   width: 160%;
   filter: blur(38px);
-  mix-blend-mode: screen;
-  opacity: 0.5;
+  opacity: 0.8;
 }
 /* Radial rather than linear so the bands fade out on every edge —
    a linear gradient leaves hard top and bottom lines. */
 .fog-1 {
   bottom: 22%; height: 12vh;
-  background: radial-gradient(ellipse 58% 100% at 44% 50%, rgba(200,214,220,0.34) 0%, rgba(224,232,236,0.14) 42%, transparent 72%);
+  background: radial-gradient(ellipse 58% 100% at 44% 50%, rgba(250,246,235,0.75) 0%, rgba(250,246,235,0.35) 42%, transparent 72%);
   animation: fogdrift 75s ease-in-out infinite alternate;
 }
 .fog-2 {
-  bottom: 29%; height: 10vh; opacity: 0.28;
-  background: radial-gradient(ellipse 48% 100% at 62% 50%, rgba(186,204,214,0.30) 0%, transparent 70%);
+  bottom: 29%; height: 10vh; opacity: 0.55;
+  background: radial-gradient(ellipse 48% 100% at 62% 50%, rgba(250,246,235,0.7) 0%, transparent 70%);
   animation: fogdrift 110s ease-in-out infinite alternate-reverse;
 }
 .fog-3 {
-  bottom: 13%; height: 14vh; opacity: 0.44;
-  background: radial-gradient(ellipse 66% 100% at 38% 50%, rgba(214,226,230,0.30) 0%, rgba(232,176,120,0.10) 46%, transparent 74%);
+  bottom: 13%; height: 14vh; opacity: 0.7;
+  background: radial-gradient(ellipse 66% 100% at 38% 50%, rgba(250,246,235,0.7) 0%, rgba(244,232,204,0.28) 46%, transparent 74%);
   animation: fogdrift 140s ease-in-out infinite alternate;
 }
 @keyframes fogdrift {
@@ -283,9 +294,20 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
   50%      { opacity: 0.30; }
 }
 
+/* Sepia edge-darkening — an old print, not a night sky. */
 .vignette {
   position: fixed; inset: 0; pointer-events: none;
-  background: radial-gradient(ellipse at 50% 45%, transparent 40%, rgba(6,12,16,0.42) 78%, rgba(4,9,12,0.72) 100%);
+  background: radial-gradient(ellipse at 50% 45%, transparent 46%, rgba(112,86,48,0.16) 80%, rgba(86,64,34,0.34) 100%);
+}
+
+/* The poster's paper margin. */
+.frame {
+  position: fixed; inset: 0; pointer-events: none; z-index: 5;
+  border: clamp(8px, 1.6vw, 20px) solid var(--paper);
+}
+.frame::after {
+  content: ''; position: absolute; inset: 0;
+  border: 1.5px solid rgba(34, 65, 79, 0.30);
 }
 
 /* ============================================================
@@ -297,7 +319,7 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
    ============================================================ */
 .grain {
   position: fixed; inset: 0; pointer-events: none; z-index: 1;
-  opacity: 0.13;
+  opacity: 0.2;
   mix-blend-mode: overlay;
   background-repeat: repeat;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
@@ -319,11 +341,14 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
   display: grid;
   grid-template-rows: auto 1fr auto;
   height: 100dvh;
+  /* --frame-w matches the .frame border so the clock and player sit
+     inside the paper margin, not underneath it. */
+  --frame-w: clamp(8px, 1.6vw, 20px);
   padding:
-    calc(1.15rem + env(safe-area-inset-top))
-    calc(1.3rem + env(safe-area-inset-right))
-    calc(1.15rem + env(safe-area-inset-bottom))
-    calc(1.3rem + env(safe-area-inset-left));
+    calc(0.9rem + var(--frame-w) + env(safe-area-inset-top))
+    calc(1rem + var(--frame-w) + env(safe-area-inset-right))
+    calc(0.9rem + var(--frame-w) + env(safe-area-inset-bottom))
+    calc(1rem + var(--frame-w) + env(safe-area-inset-left));
 }
 
 /* --- Topbar --- */
@@ -351,8 +376,8 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
   font-family: 'Tiro Devanagari Hindi', serif;
   font-size: clamp(2.5rem, 9vw, 4.6rem);
   line-height: 1.25;
-  color: var(--ivory);
-  text-shadow: 0 2px 30px rgba(10, 18, 24, 0.55);
+  color: var(--ink-red);
+  text-shadow: 0 1px 0 rgba(255, 250, 235, 0.6);
 }
 .wordmark-en {
   font-family: 'Fraunces', Georgia, serif;
@@ -444,7 +469,7 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 }
 .progress-track {
   position: absolute; left: 0; right: 0; height: 2px;
-  background: rgba(234, 223, 203, 0.16); border-radius: 2px;
+  background: rgba(34, 65, 79, 0.18); border-radius: 2px;
 }
 .progress-fill {
   position: absolute; left: 0; height: 2px; width: 0%;
@@ -454,7 +479,7 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
   position: absolute; left: 0; width: 9px; height: 9px;
   margin-left: -4.5px; border-radius: 50%;
   background: var(--amber);
-  box-shadow: 0 0 10px rgba(230, 165, 102, 0.75);
+  box-shadow: 0 0 10px rgba(181, 67, 44, 0.55);
   opacity: 0; transition: opacity 0.2s;
 }
 .progress:hover .progress-knob,
@@ -474,7 +499,7 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 
 .play {
   width: 52px; height: 52px; border-radius: 50%;
-  background: var(--ivory); color: var(--sky-deep);
+  background: var(--ink-red); color: #f2e9d0;
   display: grid; place-items: center;
   transition: transform 0.15s, background 0.2s;
 }
@@ -487,7 +512,7 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
    ============================================================ */
 .backdrop {
   position: fixed; inset: 0; z-index: 3;
-  background: rgba(5, 10, 14, 0.55);
+  background: rgba(84, 64, 36, 0.38);
   backdrop-filter: blur(3px);
   opacity: 0; pointer-events: none;
   transition: opacity 0.3s;
@@ -531,7 +556,7 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
   padding: 0.62rem 1.2rem; text-align: left;
   transition: background 0.15s;
 }
-.track:hover { background: rgba(234, 223, 203, 0.05); }
+.track:hover { background: rgba(34, 65, 79, 0.06); }
 .track-num {
   font-family: 'JetBrains Mono', ui-monospace, monospace;
   font-size: 0.62rem; color: var(--ivory-faint); width: 1.4rem; flex-shrink: 0;
@@ -573,7 +598,7 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 .intro-hi {
   font-family: 'Tiro Devanagari Hindi', serif;
   font-size: clamp(2rem, 8vw, 3.4rem);
-  color: var(--ivory);
+  color: var(--ink-red);
 }
 .intro-sub {
   font-family: 'Fraunces', Georgia, serif; font-style: italic; font-weight: 300;
@@ -678,14 +703,16 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
     <svg viewBox="0 0 620 260" preserveAspectRatio="xMidYMax meet">
       <defs>
         <linearGradient id="gSnow" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%"   stop-color="#f4ead6" stop-opacity="0.98" />
-          <stop offset="26%"  stop-color="#dfe2da" stop-opacity="0.94" />
-          <stop offset="58%"  stop-color="#7e93a0" stop-opacity="0.90" />
-          <stop offset="100%" stop-color="#1b3040" stop-opacity="0.88" />
+          <stop offset="0%"   stop-color="#fcf8ec" />
+          <stop offset="30%"  stop-color="#efeada" />
+          <stop offset="62%"  stop-color="#a4b5ab" />
+          <stop offset="100%" stop-color="#67816f" />
         </linearGradient>
+        <!-- In the dusk version this was a warm highlight; on a daylight
+             poster the same faces read as cool blue shadow instead. -->
         <linearGradient id="gFace" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%"   stop-color="#fff6e6" stop-opacity="0.92" />
-          <stop offset="100%" stop-color="#f0e4cf" stop-opacity="0.08" />
+          <stop offset="0%"   stop-color="#7e98a4" stop-opacity="0.80" />
+          <stop offset="100%" stop-color="#7e98a4" stop-opacity="0.05" />
         </linearGradient>
       </defs>
 
@@ -767,12 +794,12 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
     <svg class="road-art" viewBox="0 0 640 300" preserveAspectRatio="none" aria-hidden="true">
       <defs>
         <linearGradient id="gRoadEdge" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%"   stop-color="#e8b078" stop-opacity="0.34" />
-          <stop offset="100%" stop-color="#e8b078" stop-opacity="0.92" />
+          <stop offset="0%"   stop-color="#f2e8cc" stop-opacity="0.55" />
+          <stop offset="100%" stop-color="#f2e8cc" stop-opacity="0.98" />
         </linearGradient>
         <linearGradient id="gTar" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%"   stop-color="#2e3942" stop-opacity="0.75" />
-          <stop offset="100%" stop-color="#0f171d" stop-opacity="1" />
+          <stop offset="0%"   stop-color="#8d8674" stop-opacity="0.85" />
+          <stop offset="100%" stop-color="#5f594a" stop-opacity="1" />
         </linearGradient>
       </defs>
 
@@ -955,6 +982,7 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 <div class="vignette" aria-hidden="true"></div>
 <div class="aged" aria-hidden="true"></div>
 <div class="grain" aria-hidden="true"></div>
+<div class="frame" aria-hidden="true"></div>
 
 <!-- ============================================================
      PAGE
@@ -1074,6 +1102,10 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
    player skips it automatically, but you can delete the line.
    ================================================================ */
 const PLAYLIST = [
+  // --- Basanti Bisht (Padma Shri) — first woman to sing the jagar ---
+  { id: 'VBbB8ZSyMKc', title: 'Basanti',               artist: 'Basanti Bisht',             region: 'garhwali' },
+  { id: 'vhWwleWfNH0', title: 'Devbhumi Uttarakhand',  artist: 'Basanti Bisht',             region: 'garhwali' },
+
   // --- The old Kumaoni voices ---
   // Gopal Babu Goswami, Heera Singh Rana, and Mohan & Naima Khan Upreti
   // between them are most of what Kumaoni folk music sounds like.
